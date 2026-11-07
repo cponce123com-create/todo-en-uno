@@ -47,6 +47,10 @@ object ToolCatalog {
         ToolDefinition("magnifier", "Lupa", "Ampliación con cámara trasera", "🔎", ToolCategory.MULTIMEDIA),
         ToolDefinition("qrscan", "Escanear QR", "Lee códigos QR sin conexión", "📷", ToolCategory.PRODUCTIVIDAD),
         ToolDefinition("sound", "Sonómetro relativo", "Señal del micrófono en dBFS", "🔊", ToolCategory.SENSORES),
+        ToolDefinition("metronome", "Metrónomo", "Pulsos de audio ajustables", "🎼", ToolCategory.MULTIMEDIA),
+        ToolDefinition("age", "Calcular edad", "Años, meses y días", "📅", ToolCategory.CALCULO),
+        ToolDefinition("bmi", "IMC", "Índice de masa corporal orientativo", "⚖️", ToolCategory.CALCULO),
+        ToolDefinition("network", "Información de red", "Conexión y DNS", "📶", ToolCategory.SISTEMA),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }

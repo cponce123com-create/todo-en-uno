@@ -8,11 +8,12 @@ Centro de herramientas Android, desarrollado con Kotlin y Jetpack Compose. Aplic
 - Calculadora, linterna, conversor de unidades, cronómetro, temporizador y reloj mundial.
 - Reproductor de audio local (Media3 ExoPlayer + MediaSessionService) con control desde pantalla bloqueada y notificación.
 - Brújula magnética, nivel de burbuja, generador QR y contraseñas seguras.
-- Iconografía 3D refinada y catálogo ampliado a 25 herramientas.
+- Iconografía 3D refinada y catálogo ampliado a 29 herramientas.
 - Grabadora de voz con archivos privados y exportación mediante selector del sistema.
 - Divisas con tasas fechadas y guardadas offline (Frankfurter), GPS, regla calibrable, Pomodoro.
 - Texto, RGB/HEX, finanzas, código Morse y diagnóstico del dispositivo.
 - Espejo, lupa, lector QR con CameraX y medidor relativo de audio dBFS.
+- Calculadora científica, ocho categorías de unidades, metrónomo, IMC, edad e información de red.
 - Interfaz Material 3 con modo claro/oscuro automático.
 - Arquitectura modular: `app`, `core:catalog`, `feature:utilities`.
 - APK de depuración generado por GitHub Actions, sin instalar Android Studio.

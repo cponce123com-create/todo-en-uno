@@ -47,7 +47,10 @@
 - [x] Tipo de cambio con actualización manual y caché con fecha.
 - [x] GPS con solicitud de ubicación al entrar.
 - [x] Regla calibrable en pantalla, Pomodoro, herramientas de texto, RGB/HEX, cálculos financieros, Morse y datos del equipo.
-- [ ] Comprobar CI y testear en teléfono real micrófono, GPS y red.
+- [x] Espejo, lupa, escáner QR, medidor relativo de sonido.
+- [x] Metrónomo, IMC, edad y red local.
+- [x] Calculadora científica y conversión ampliada.
+- [ ] Comprobar CI final y testear en teléfono real micrófono, GPS, red y cámara.
 
 ## Prioridades 0.4.0
 

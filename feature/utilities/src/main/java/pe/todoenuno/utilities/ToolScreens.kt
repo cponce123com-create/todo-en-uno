@@ -29,6 +29,10 @@ fun ToolScreen(id: String) {
         "finance" -> FinancialToolsScreen()
         "morse" -> MorseToolsScreen()
         "device" -> DeviceInfoScreen()
+        "metronome" -> MetronomeScreen()
+        "age" -> AgeScreen()
+        "bmi" -> BmiScreen()
+        "network" -> NetworkInfoScreen()
         else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Herramienta no disponible")
         }

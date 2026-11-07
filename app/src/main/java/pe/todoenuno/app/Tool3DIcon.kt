@@ -217,6 +217,28 @@ private fun renderGlyph(c:NativeCanvas,id:String){
             line(c,40f,52f,57f,52f,gold,3f)
             circle(c,49f,71f,3f,navy)
         }
+        "metronome" -> {
+            triangle(c,49f,22f,24f,71f,74f,71f,navy)
+            triangle(c,49f,33f,32f,66f,66f,66f,ivory)
+            line(c,50f,60f,65f,27f,coral,5f)
+            circle(c,65f,27f,5f,gold)
+        }
+        "age" -> {
+            rr(c,26f,25f,73f,72f,6f,ivory)
+            rr(c,26f,25f,73f,38f,6f,coral)
+            text(c,"31",49f,62f,26f,navy)
+        }
+        "bmi" -> {
+            rr(c,23f,31f,74f,68f,8f,ivory)
+            circle(c,49f,44f,12f,navy)
+            triangle(c,49f,34f,44f,47f,55f,47f,coral)
+            text(c,"KG",49f,63f,13f,navy)
+        }
+        "network" -> {
+            c.drawArc(RectF(25f,20f,74f,66f),220f,100f,false,brush(ivory,6f))
+            c.drawArc(RectF(34f,34f,65f,65f),220f,100f,false,brush(ivory,6f))
+            circle(c,49f,65f,6f,gold)
+        }
         else -> text(c,id.take(2).uppercase(),49f,58f,25f)
     }
 }
