@@ -15,6 +15,20 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.net.URLEncoder
 
+fun weatherDescription(code:Int):String = when(code) {
+                0 -> "Despejado"
+                1,2 -> "Mayormente despejado"
+                3 -> "Nublado"
+                45,48 -> "Niebla"
+                51,53,55,56,57 -> "Llovizna"
+                61,63,65,66,67 -> "Lluvia"
+                71,73,75,77 -> "Nieve"
+                80,81,82 -> "Chubascos"
+                85,86 -> "Chubascos de nieve"
+                95,96,99 -> "Tormenta"
+                else -> "Código meteorológico WMO $code"
+            }
+
 private data class WeatherReport(val place:String,val temperature:Double,val apparent:Double,val humidity:Int,val wind:Double,val code:Int,val observed:String)
 private fun weatherJson(url:String):JSONObject {
     val conn=(URL(url).openConnection() as HttpURLConnection).apply {
@@ -69,19 +83,7 @@ fun WeatherScreen() {
             Text("${it.temperature} °C",style=MaterialTheme.typography.displayMedium)
             Text("Sensación térmica: ${it.apparent} °C")
             Text("Humedad: ${it.humidity}% · Viento: ${it.wind} km/h")
-            Text("Condición: "+when(it.code) {
-                0 -> "Despejado"
-                1,2 -> "Mayormente despejado"
-                3 -> "Nublado"
-                45,48 -> "Niebla"
-                51,53,55,56,57 -> "Llovizna"
-                61,63,65,66,67 -> "Lluvia"
-                71,73,75,77 -> "Nieve"
-                80,81,82 -> "Chubascos"
-                85,86 -> "Chubascos de nieve"
-                95,96,99 -> "Tormenta"
-                else -> "Código meteorológico WMO ${it.code}"
-            })
+            Text("Condición: "+weatherDescription(it.code))
             Text("Actualizado por el proveedor: ${it.observed} (hora local de la ciudad)",style=MaterialTheme.typography.bodySmall)
         }
         Text("La temperatura corresponde a una estación/modelo meteorológico, no a un sensor del teléfono. Una cámara térmica real requiere hardware infrarrojo.",style=MaterialTheme.typography.bodySmall)
