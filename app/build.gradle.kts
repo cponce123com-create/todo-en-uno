@@ -36,6 +36,9 @@ android {
 dependencies {
     implementation(project(":core:catalog"))
     implementation(project(":feature:utilities"))
+    implementation(project(":feature:math-tools"))
+    implementation(project(":feature:sensor-tools"))
+    implementation(project(":feature:location-tools"))
     implementation(project(":feature:audio"))
     implementation(project(":feature:recorder"))
     implementation(project(":feature:finance"))
@@ -51,4 +54,5 @@ dependencies {
     implementation(libs.lifecycle.viewmodel.compose)
     implementation(libs.serialization.json)
     debugImplementation(libs.compose.tooling)
+    testImplementation(libs.junit)
 }

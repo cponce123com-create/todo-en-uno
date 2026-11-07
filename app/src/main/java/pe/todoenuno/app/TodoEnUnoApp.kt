@@ -53,18 +53,11 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import pe.todoenuno.audio.AudioPlayerScreen
-import pe.todoenuno.camera.CameraToolScreen
 import pe.todoenuno.catalog.CatalogMode
 import pe.todoenuno.catalog.ToolCatalog
 import pe.todoenuno.catalog.ToolCategory
 import pe.todoenuno.catalog.ToolDefinition
 import pe.todoenuno.catalog.ToolFilters
-import pe.todoenuno.finance.CurrencyScreen
-import pe.todoenuno.recorder.SoundMeterScreen
-import pe.todoenuno.recorder.TunerScreen
-import pe.todoenuno.recorder.VoiceRecorderScreen
-import pe.todoenuno.utilities.ToolScreen
 
 private data class BottomTab(val name: String, val symbol: String, val route: Any)
 private val bottomTabs = listOf(
@@ -272,15 +265,7 @@ private fun ToolDetail(id: String, onBack: () -> Unit, onInfo: () -> Unit) {
             }
         } else {
             Box(Modifier.fillMaxSize()) {
-                when (id) {
-                    "audio" -> AudioPlayerScreen()
-                    "recorder" -> VoiceRecorderScreen()
-                    "currency" -> CurrencyScreen()
-                    "sound" -> SoundMeterScreen()
-                    "tuner" -> TunerScreen()
-                    "mirror", "magnifier", "qrscan" -> CameraToolScreen(id)
-                    else -> ToolScreen(id)
-                }
+                AppToolRenderer(id)
             }
         }
     }
