@@ -34,10 +34,22 @@ jobs:
           "$SDKMANAGER" --install "platforms;android-36" "build-tools;35.0.0"
       - name: Preparar Gradle
         uses: gradle/actions/setup-gradle@v4
+      - name: Validar Wrapper
+        run: |
+          chmod +x ./gradlew
+          ./gradlew --version
+      - name: Pruebas JVM globales, Lint y APK
+        run: ./gradlew :core:catalog:test testDebugUnitTest lintDebug :app:assembleDebug --no-daemon --stacktrace
+      - name: Conservar informes Lint y JUnit
+        if: always()
+        uses: actions/upload-artifact@v4
         with:
-          gradle-version: '8.13'
-      - name: Ejecutar pruebas y compilar
-        run: gradle :feature:utilities:testDebugUnitTest :feature:recorder:testDebugUnitTest :app:assembleDebug --no-daemon --stacktrace
+          name: todo-en-uno-quality-reports
+          path: |
+            **/build/reports/lint-results-*.html
+            **/build/reports/tests/**
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Publicar APK
         if: success()
         uses: actions/upload-artifact@v4

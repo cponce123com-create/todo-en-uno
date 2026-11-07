@@ -2,7 +2,17 @@
 
 Aplicación Android nativa y modular en **Kotlin + Jetpack Compose + Material 3**, diseñada en español.
 
-## Versión 0.4.0
+## Arquitectura: versión 0.5.0
+- Navigation Compose con rutas tipadas (Kotlin Serialization) y Back Stack real.
+- Deep links locales: `todoenuno://tool/flashlight` o `todoenuno://tool/calculator`.
+- Pantalla de información como destino secundario (Herramienta → Información → Herramienta).
+- `HomeViewModel` con `SavedStateHandle` para búsqueda y filtros; favoritos en DataStore.
+- `gradle/libs.versions.toml` centraliza versiones de los módulos y plugins.
+- Wrapper oficial de Gradle 8.13: `./gradlew` o `gradlew.bat`.
+- CI ejecuta pruebas de todos los módulos Android, tests JVM, Lint y APK.
+- Los gráficos 3D son decorativos para lectores de pantalla; las tarjetas y estrellas tienen etiquetas legibles.
+
+## Herramientas heredadas de 0.4.0
 
 **33 herramientas disponibles** en el catálogo y organizadas por categorías, con búsqueda, favoritos persistentes y portada de iconos vectoriales 3D en cuadrícula:
 
@@ -31,7 +41,7 @@ El artefacto contiene `app-debug.apk`. Requiere Android 8.0 (API 26) o superior.
 - `feature:camera`: cámara con CameraX y reconocimiento QR ZXing.
 - `.github/workflows/android.yml`: pruebas unitarias y APK debug.
 
-Para compilar localmente se necesita JDK 17, Android SDK 36 y Gradle 8.13. El Gradle Wrapper aún no se ha añadido.
+Para compilar localmente necesitas JDK 17 y Android SDK 36; usa el Wrapper incluido: `./gradlew :app:assembleDebug` (Linux/macOS) o `gradlew.bat :app:assembleDebug` (Windows).
 
 ## Privacidad y límites
 
