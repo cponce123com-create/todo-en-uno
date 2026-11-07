@@ -46,7 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavGraph.Companion.findStartDestination
-import androidx.navigation.hasRoute
+import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.navDeepLink
 import androidx.navigation.toRoute
 import androidx.navigation.compose.NavHost
