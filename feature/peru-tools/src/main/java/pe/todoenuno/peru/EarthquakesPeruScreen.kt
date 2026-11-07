@@ -69,6 +69,20 @@ object IgpService {
             )
         }.take(30)
     }
+    fun newestFirst(events:List<QuakeReport>):List<QuakeReport> {
+        val formats=listOf("dd/MM/yyyy HH:mm:ss","dd/MM/yyyy HH:mm","yyyy-MM-dd HH:mm:ss","yyyy-MM-dd HH:mm")
+        fun timestamp(event:QuakeReport):Long {
+            val raw="${event.date} ${event.time}".trim()
+            for(pattern in formats) {
+                val parsed=runCatching {
+                    SimpleDateFormat(pattern,Locale("es","PE")).apply { isLenient=false }.parse(raw)
+                }.getOrNull()
+                if(parsed!=null)return parsed.time
+            }
+            return 0L
+        }
+        return events.sortedByDescending(::timestamp)
+    }
     fun fetch():List<QuakeReport> {
         val conn=(URL(ENDPOINT).openConnection() as HttpURLConnection).apply {
             connectTimeout=9000
@@ -95,11 +109,11 @@ fun EarthquakesPeruScreen() {
         (0 until saved.length()).map { i ->
             val o=saved.getJSONObject(i)
             QuakeReport(
-                o.optDouble("magnitude").takeIf{it.isFinite()},
-                o.optDouble("depthKm").takeIf{it.isFinite()},
+                o.optDouble("magnitude").takeIf{!o.isNull("magnitude") && it.isFinite()},
+                o.optDouble("depthKm").takeIf{!o.isNull("depthKm") && it.isFinite()},
                 o.optString("date"),o.optString("time"),o.optString("reference"),
-                o.optDouble("latitude").takeIf{it.isFinite()},
-                o.optDouble("longitude").takeIf{it.isFinite()}
+                o.optDouble("latitude").takeIf{!o.isNull("latitude") && it.isFinite()},
+                o.optDouble("longitude").takeIf{!o.isNull("longitude") && it.isFinite()}
             )
         }
     }.getOrDefault(emptyList()))}
@@ -115,9 +129,9 @@ fun EarthquakesPeruScreen() {
             runCatching{withContext(Dispatchers.IO){IgpService.fetch()}}
                 .onSuccess {list->
                     // Keep a bounded local history across app restarts; never invent events.
-                    reports=(list+reports).distinctBy {
+                    reports=IgpService.newestFirst((list+reports).distinctBy {
                         "${it.date}|${it.time}|${it.reference}|${it.magnitude}"
-                    }.sortedWith(compareByDescending<QuakeReport>{it.date}.thenByDescending{it.time}).take(100)
+                    }).take(100)
                     updated=System.currentTimeMillis()
                     val json=JSONArray()
                     reports.forEach { event ->

@@ -83,7 +83,17 @@ fun ConstitutionScreen() {
                         ParcelFileDescriptor.open(tmp,ParcelFileDescriptor.MODE_READ_ONLY).use {fd->
                             PdfRenderer(fd).use {require(it.pageCount>0)}
                         }
-                        require(tmp.renameTo(file)){"No se pudo guardar la Constitución"}
+                        // Keep the previous validated document until replacement succeeds.
+                        val backup=File(file.parentFile,"constitution.previous.pdf")
+                        if(file.exists()) {
+                            backup.delete()
+                            require(file.renameTo(backup)){"No se pudo respaldar la edición anterior"}
+                        }
+                        if(!tmp.renameTo(file)) {
+                            if(backup.exists()) backup.renameTo(file)
+                            error("No se pudo guardar la Constitución")
+                        }
+                        backup.delete()
                     }
                 }.onSuccess{
                     documentLoaded=true;page=0;reloaded++

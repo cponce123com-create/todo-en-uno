@@ -105,7 +105,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
             shape=RoundedCornerShape(22.dp)
         ) {
             Column(
-                modifier=Modifier.fillMaxWidth().padding(18.dp),
+                modifier=Modifier.fillMaxWidth().padding(if(compact) 8.dp else 18.dp),
                 verticalArrangement=Arrangement.spacedBy(6.dp)
             ) {
                 Text("Expresión",style=MaterialTheme.typography.labelMedium,
@@ -114,12 +114,12 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                     value=expression,
                     onValueChange={expression=it.take(240);error=null},
                     modifier=Modifier.fillMaxWidth(),
-                    maxLines=3,
+                    maxLines=if(compact) 1 else 2,
                     placeholder={Text("Ej. sin(45)^2 + cos(45)^2")},
                     keyboardOptions=KeyboardOptions.Default,
                 )
                 Text(lastResult,modifier=Modifier.fillMaxWidth(),
-                    textAlign=TextAlign.End,fontSize=31.sp,
+                    textAlign=TextAlign.End,fontSize=if(compact) 25.sp else 31.sp,
                     fontWeight=FontWeight.Bold,
                     color=MaterialTheme.colorScheme.primary)
                 error?.let {
@@ -137,7 +137,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                 }
             }
         }
-        Text("Funciones científicas",style=MaterialTheme.typography.labelLarge,
+        if(!compact) Text("Funciones científicas",style=MaterialTheme.typography.labelLarge,
             modifier=Modifier.padding(top=4.dp))
         val keys=listOf(
             listOf("asin","acos","atan","DEG/RAD","⌫"),
@@ -187,7 +187,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                 }
             }
         }
-        Text("Operaciones locales. Usa funciones como sin(45), sqrt(9), 5!, 2^3 y DEG/RAD.",
+        if(!compact) Text("Operaciones locales. Usa funciones como sin(45), sqrt(9), 5!, 2^3 y DEG/RAD.",
             style=MaterialTheme.typography.bodySmall,
             color=MaterialTheme.colorScheme.onSurfaceVariant)
     }
