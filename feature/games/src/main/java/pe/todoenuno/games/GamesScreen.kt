@@ -63,7 +63,7 @@ private fun Board(modifier:Modifier,ui:GameUi,won:Boolean=false,onRestart:()->Un
     }
 }
 
-/** One dominant swipe per gesture; buttons remain available for precision and accessibility. */
+/** Uses the dominant drag axis after a threshold; buttons remain available for accessibility. */
 private fun Modifier.swipe(enabled:Boolean,onDirection:(Direction)->Unit):Modifier=pointerInput(enabled) {
     if(enabled) {
         var drag=Offset.Zero

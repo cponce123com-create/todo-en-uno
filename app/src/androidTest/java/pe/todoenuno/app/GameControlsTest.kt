@@ -22,42 +22,42 @@ class GameControlsTest {
     @get:Rule val compose=createComposeRule()
 
     @Test fun touchDownActsBeforeFingerIsReleasedAndDoesNotDoubleFire() {
-        var count=0
+        val count=java.util.concurrent.atomic.AtomicInteger()
         compose.setContent {MaterialTheme {
-            GameControl("↑","Subir",true,Modifier.testTag("control")){count++}
+            GameControl("↑","Subir",true,Modifier.testTag("control")){count.incrementAndGet()}
         }}
         compose.onNodeWithTag("control").performTouchInput{down(center)}
-        compose.runOnIdle{assertEquals(1,count)}
+        compose.runOnIdle{assertEquals(1,count.get())}
         compose.onNodeWithTag("control").performTouchInput{up()}
-        compose.runOnIdle{assertEquals(1,count)}
+        compose.runOnIdle{assertEquals(1,count.get())}
     }
     @Test fun holdingRepeatsAndReleaseStopsActions() {
-        var count=0
+        val count=java.util.concurrent.atomic.AtomicInteger()
         compose.setContent {MaterialTheme {
-            GameControl("Fuego","Disparar",true,Modifier.testTag("control"),80L){count++}
+            GameControl("Fuego","Disparar",true,Modifier.testTag("control"),80L){count.incrementAndGet()}
         }}
         compose.onNodeWithTag("control").performTouchInput{down(center)}
-        compose.waitUntil(2000){count>=3}
+        compose.waitUntil(2000){count.get()>=3}
         compose.onNodeWithTag("control").performTouchInput{up()}
         var released=0
-        compose.runOnIdle{released=count}
+        compose.runOnIdle{released=count.get()}
         compose.mainClock.advanceTimeBy(500)
-        compose.runOnIdle{assertEquals(released,count)}
+        compose.runOnIdle{assertEquals(released,count.get())}
     }
     @Test fun disablingControlCancelsHeldAction() {
-        var count=0
+        val count=java.util.concurrent.atomic.AtomicInteger()
         var enabled by mutableStateOf(true)
         compose.setContent {MaterialTheme {
-            GameControl("→","Derecha",enabled,Modifier.testTag("control"),80L){count++}
+            GameControl("→","Derecha",enabled,Modifier.testTag("control"),80L){count.incrementAndGet()}
         }}
         compose.onNodeWithTag("control").performTouchInput{down(center)}
-        compose.waitUntil(2000){count>=2}
+        compose.waitUntil(2000){count.get()>=2}
         compose.runOnIdle{enabled=false}
         compose.waitForIdle()
         var stopped=0
-        compose.runOnIdle{stopped=count}
+        compose.runOnIdle{stopped=count.get()}
         compose.mainClock.advanceTimeBy(500)
-        compose.runOnIdle{assertEquals(stopped,count)}
+        compose.runOnIdle{assertEquals(stopped,count.get())}
         compose.onNodeWithTag("control").assertIsNotEnabled()
         compose.onNodeWithTag("control").performTouchInput{up()}
     }
