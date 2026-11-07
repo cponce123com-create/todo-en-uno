@@ -1,41 +1,27 @@
 package pe.todoenuno.utilities
 
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.material3.Text
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
-/** Punto de entrada público del módulo: la app no necesita importar pantallas internas. */
+/** Solo utilidades del dominio productividad/tiempo y sistema. */
 @Composable
 fun ToolScreen(id: String) {
     when (id) {
-        "calculator" -> CalculatorScreen()
-        "converter" -> ConverterScreen()
         "stopwatch" -> StopwatchScreen()
-        "flashlight" -> FlashlightScreen()
         "countdown" -> CountdownScreen()
-        "worldclock" -> WorldClockScreen()
-        "compass" -> CompassScreen()
-        "level" -> LevelScreen()
         "qr" -> QrGeneratorScreen()
         "password" -> PasswordGeneratorScreen()
-        "gps" -> GpsToolScreen()
-        "ruler" -> RulerScreen()
         "pomodoro" -> PomodoroScreen()
         "text" -> TextToolsScreen()
         "color" -> ColorToolsScreen()
-        "finance" -> FinancialToolsScreen()
         "morse" -> MorseToolsScreen()
         "device" -> DeviceInfoScreen()
         "metronome" -> MetronomeScreen()
-        "age" -> AgeScreen()
-        "bmi" -> BmiScreen()
         "network" -> NetworkInfoScreen()
-        "solar" -> SolarLunarScreen()
-        "magnetic" -> MagneticFieldScreen()
-        "distance" -> DistanceCalculatorScreen()
         else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Herramienta no disponible")
         }

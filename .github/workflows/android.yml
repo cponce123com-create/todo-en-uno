@@ -13,7 +13,7 @@ jobs:
   debug-apk:
     name: Tests y APK debug
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Descargar codigo
         uses: actions/checkout@v4
@@ -38,8 +38,8 @@ jobs:
         run: |
           chmod +x ./gradlew
           ./gradlew --version
-      - name: Pruebas JVM globales, Lint y APK
-        run: ./gradlew :core:catalog:test testDebugUnitTest lintDebug :app:assembleDebug --no-daemon --stacktrace
+      - name: Pruebas globales, Lint y compilación de APKs
+        run: ./gradlew :core:catalog:test testDebugUnitTest lintDebug :app:assembleDebug :app:assembleDebugAndroidTest --no-daemon --stacktrace
       - name: Conservar informes Lint y JUnit
         if: always()
         uses: actions/upload-artifact@v4
@@ -57,4 +57,50 @@ jobs:
           name: todo-en-uno-debug-apk
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 14
+
+  ui-tests:
+    name: Pruebas de navegación y favoritos en emulador API 35
+    needs: debug-apk
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - name: Descargar código
+        uses: actions/checkout@v4
+      - name: Preparar Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Habilitar KVM
+        run: |
+          sudo sh -c 'echo KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm" > /etc/udev/rules.d/99-kvm4all.rules'
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+      - name: Preparar Gradle
+        uses: gradle/actions/setup-gradle@v4
+      - name: Instalar SDK 36
+        run: |
+          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager -print -quit)
+          yes | "$SDKMANAGER" --licenses > /dev/null || true
+          "$SDKMANAGER" --install "platforms;android-36"
+      - name: Ejecutar ComposeTestRule en emulador
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
+          script: ./gradlew :app:connectedDebugAndroidTest --no-daemon --stacktrace
+      - name: Informes instrumentados
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: todo-en-uno-ui-test-reports
+          path: |
+            app/build/reports/androidTests/**
+            app/build/outputs/androidTest-results/**
+          if-no-files-found: ignore
           retention-days: 14

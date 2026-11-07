@@ -2,7 +2,9 @@
 
 Aplicación Android nativa y modular en **Kotlin + Jetpack Compose + Material 3**, diseñada en español.
 
-## Arquitectura: versión 0.5.0
+## Arquitectura: versión 0.6.0
+
+Las herramientas se separaron por dominios en `:feature:math-tools`, `:feature:sensor-tools` y `:feature:location-tools`. También incorporamos pruebas de UI en emulador, rutas comprobadas para 33 herramientas y colores dinámicos en brújula/nivel/regla. Consulta [ARCHITECTURE](docs/ARCHITECTURE.md) para límites y la decisión de DI manual.
 - Navigation Compose con rutas tipadas (Kotlin Serialization) y Back Stack real.
 - Deep links locales: `todoenuno://tool/flashlight` o `todoenuno://tool/calculator`.
 - Pantalla de información como destino secundario (Herramienta → Información → Herramienta).
