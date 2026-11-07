@@ -57,3 +57,14 @@
 - Escáner QR usando cámara, lupa/espejo, sonómetro orientativo, alarma y cronómetro de vueltas.
 - Mapas y mediciones con proveedor cartográfico y soporte offline legítimo.
 - Reproducción y grabación avanzada con servicio en primer plano y controles persistentes.
+
+## 0.4.0 — Señalización, naturaleza y cálculos
+- [x] Linterna SOS y nivel de intensidad donde hardware/API lo admite.
+- [x] Amanecer, atardecer y fase lunar aproximados offline.
+- [x] Campo magnético en µT (no detector de metales fiable).
+- [x] Afinador monofónico y prueba sintética.
+- [x] Distancia geodésica entre coordenadas con pruebas.
+- [x] Aviso opcional aproximado del temporizador en segundo plano (WorkManager).
+- [ ] Mapas dentro de la app y medición AR de cámara.
+- [ ] Alarmas exactas con estrategia de permisos.
+- [ ] Validación manual de sensores, audio, linterna y notificaciones.

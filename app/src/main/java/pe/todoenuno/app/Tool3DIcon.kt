@@ -244,6 +244,30 @@ private fun renderGlyph(c:NativeCanvas,id:String){
             c.drawArc(RectF(34f,34f,65f,65f),220f,100f,false,brush(ivory,6f))
             circle(c,49f,65f,6f,gold)
         }
+        "solar" -> {
+            circle(c,37f,42f,18f,gold)
+            circle(c,57f,51f,19f,navy)
+            circle(c,65f,44f,19f,ivory)
+            circle(c,60f,44f,18f,navy)
+        }
+        "magnetic" -> {
+            c.drawArc(RectF(26f,23f,72f,69f),0f,180f,false,brush(ivory,13f))
+            line(c,27f,49f,27f,64f,coral,13f)
+            line(c,71f,49f,71f,64f,mint,13f)
+        }
+        "tuner" -> {
+            rr(c,25f,28f,74f,67f,10f,ivory)
+            circle(c,49f,46f,13f,navy)
+            line(c,49f,46f,63f,37f,coral,4f)
+            line(c,37f,60f,62f,60f,navy,4f)
+        }
+        "distance" -> {
+            circle(c,28f,31f,9f,coral)
+            triangle(c,19f,35f,37f,35f,28f,52f,coral)
+            circle(c,69f,56f,9f,gold)
+            triangle(c,60f,61f,78f,61f,69f,78f,gold)
+            line(c,37f,47f,61f,58f,ivory,4f)
+        }
         else -> text(c,id.take(2).uppercase(),49f,58f,25f)
     }
 }
