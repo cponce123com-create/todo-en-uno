@@ -80,10 +80,10 @@ fun ConstitutionScreen() {
                                 }
                             }
                         }?:error("No se pudo abrir el PDF")
-                        require(tmp.renameTo(file)){"No se pudo guardar la Constitución"}
-                        ParcelFileDescriptor.open(file,ParcelFileDescriptor.MODE_READ_ONLY).use {fd->
+                        ParcelFileDescriptor.open(tmp,ParcelFileDescriptor.MODE_READ_ONLY).use {fd->
                             PdfRenderer(fd).use {require(it.pageCount>0)}
                         }
+                        require(tmp.renameTo(file)){"No se pudo guardar la Constitución"}
                     }
                 }.onSuccess{
                     documentLoaded=true;page=0;reloaded++

@@ -65,7 +65,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
             "√" -> expression + "sqrt("
             "∛" -> expression + "cbrt("
             "±" -> if (expression.isBlank()) "-" else "-($expression)"
-            "sin","cos","tan","asin","acos","atan","log","ln","abs" -> expression + token + "("
+            "sin","cos","tan","asin","acos","atan","log","ln","abs","exp" -> expression + token + "("
             else -> expression + token
         }.take(240)
         if (token == "AC") lastResult = "0"
