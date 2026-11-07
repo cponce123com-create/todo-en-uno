@@ -125,7 +125,12 @@ private fun renderGlyph(c:NativeCanvas,id:String){
                 line(c,49f,49f,49f,31f,mint,4f)
                 line(c,49f,49f,63f,55f,coral,4f)
                 circle(c,49f,49f,4f,gold)
-                if(id=="worldclock")circle(c,49f,48f,23f,0xFF55AFB7.toInt())
+                if(id=="worldclock") {
+                    circle(c,49f,48f,20f,0xFF55AFB7.toInt())
+                    line(c,49f,48f,49f,31f,ivory,3f)
+                    line(c,49f,48f,62f,50f,coral,4f)
+                    circle(c,49f,48f,4f,gold)
+                }
             }
         }
         "audio" -> {

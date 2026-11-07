@@ -26,6 +26,7 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -114,10 +115,11 @@ fun VoiceRecorderScreen() {
         }
         toExport=null
     }
+    val latestPlayer by rememberUpdatedState(player)
     DisposableEffect(engine) {
         onDispose {
             if(engine.isRecording) engine.stop()
-            player?.release()
+            latestPlayer?.release()
         }
     }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
