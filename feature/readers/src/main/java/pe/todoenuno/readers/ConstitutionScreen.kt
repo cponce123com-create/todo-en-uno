@@ -90,8 +90,8 @@ fun ConstitutionScreen() {
                             require(file.renameTo(backup)){"No se pudo respaldar la edición anterior"}
                         }
                         if(!tmp.renameTo(file)) {
-                            if(backup.exists()) backup.renameTo(file)
-                            error("No se pudo guardar la Constitución")
+                            if(backup.exists()) check(backup.renameTo(file)){"No se pudo restaurar la edición anterior"}
+                            throw IllegalStateException("No se pudo guardar la Constitución")
                         }
                         backup.delete()
                     }
