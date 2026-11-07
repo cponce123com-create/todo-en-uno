@@ -436,7 +436,7 @@ private fun FavoriteButton(tool: ToolDefinition, favorite: Boolean, toggle: () -
 private fun SettingsPanel() {
     Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Ajustes", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text("Todo en Uno · Versión 0.7.0", style = MaterialTheme.typography.titleMedium)
+        Text("Todo en Uno · Versión 0.8.0", style = MaterialTheme.typography.titleMedium)
         Text("Tema claro y oscuro: sigue la configuración del dispositivo.")
         Text("Tus favoritos se guardan solo en este teléfono.")
         Text("La mayoría de herramientas funciona sin conexión. Las divisas requieren Internet para actualizarse.")

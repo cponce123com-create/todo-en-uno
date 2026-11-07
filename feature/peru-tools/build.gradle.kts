@@ -21,4 +21,5 @@ dependencies {
     implementation(libs.compose.material3)
     implementation(libs.coroutines.android)
     testImplementation(libs.junit)
+    testImplementation("org.json:json:20240303")
 }

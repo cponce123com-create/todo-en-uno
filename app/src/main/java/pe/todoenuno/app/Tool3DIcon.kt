@@ -300,6 +300,69 @@ private fun renderGlyph(c:NativeCanvas,id:String){
             line(c,50f,28f,50f,72f,mint,3f)
             circle(c,50f,50f,5f,coral)
         }
+        "snake" -> {
+            rr(c,22f,38f,77f,64f,9f,0xFF266B37.toInt())
+            for(i in 0..3)circle(c,30f+i*12f,50f,7f,mint)
+            circle(c,71f,47f,4f,ivory)
+        }
+        "blocks" -> {
+            rr(c,30f,28f,48f,46f,3f,coral)
+            rr(c,49f,28f,67f,46f,3f,coral)
+            rr(c,49f,47f,67f,65f,3f,gold)
+            rr(c,30f,47f,48f,65f,3f,mint)
+        }
+        "shooter" -> {
+            triangle(c,49f,19f,27f,67f,71f,67f,ivory)
+            line(c,49f,32f,49f,72f,coral,5f)
+            circle(c,49f,14f,5f,gold)
+        }
+        "photopdf" -> {
+            rr(c,29f,21f,71f,75f,5f,ivory)
+            rr(c,33f,27f,67f,53f,3f,mint)
+            triangle(c,34f,53f,45f,39f,54f,53f,navy)
+            triangle(c,44f,53f,55f,32f,68f,53f,coral)
+            text(c,"PDF",49f,69f,11f,navy)
+        }
+        "earthquakes" -> {
+            line(c,20f,53f,31f,53f,ivory,4f)
+            line(c,31f,53f,37f,34f,coral,4f)
+            line(c,37f,34f,44f,66f,coral,4f)
+            line(c,44f,66f,54f,43f,coral,4f)
+            line(c,54f,43f,65f,53f,ivory,4f)
+        }
+        "idvault" -> {
+            rr(c,24f,29f,75f,68f,7f,ivory)
+            circle(c,38f,45f,9f,navy)
+            line(c,51f,40f,68f,40f,navy,3f)
+            line(c,51f,49f,65f,49f,navy,3f)
+        }
+        "notes" -> {
+            rr(c,27f,22f,72f,73f,5f,ivory)
+            line(c,35f,38f,64f,38f,navy,3f)
+            line(c,35f,49f,64f,49f,navy,3f)
+            line(c,35f,60f,58f,60f,navy,3f)
+        }
+        "bible" -> {
+            rr(c,27f,20f,73f,76f,5f,navy)
+            rr(c,31f,23f,69f,72f,4f,ivory)
+            line(c,50f,35f,50f,60f,coral,5f)
+            line(c,39f,46f,61f,46f,coral,5f)
+        }
+        "paintmix" -> {
+            circle(c,40f,42f,14f,coral)
+            circle(c,61f,42f,14f,gold)
+            circle(c,50f,58f,14f,mint)
+        }
+        "constitution" -> {
+            rr(c,28f,25f,69f,72f,5f,ivory)
+            text(c,"Art.",49f,48f,16f,navy)
+            line(c,36f,57f,61f,57f,navy,3f)
+        }
+        "recipes" -> {
+            rr(c,26f,28f,72f,73f,5f,ivory)
+            rr(c,32f,35f,65f,42f,2f,coral)
+            text(c,"🍴",49f,61f,25f,navy)
+        }
         else -> text(c,id.take(2).uppercase(),49f,58f,25f)
     }
 }

@@ -22,3 +22,5 @@ include(":feature:math-tools", ":feature:sensor-tools", ":feature:location-tools
 include(":feature:education-tools")
 
 include(":feature:document-tools")
+
+include(":feature:games",":feature:personal-tools",":feature:peru-tools",":feature:readers")

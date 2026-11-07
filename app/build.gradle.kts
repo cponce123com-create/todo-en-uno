@@ -14,8 +14,8 @@ android {
         minSdk = 26
         targetSdk = 35
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-        versionCode = 7
-        versionName = "0.7.0"
+        versionCode = 8
+        versionName = "0.8.0"
     }
 
     buildTypes {
@@ -45,6 +45,10 @@ dependencies {
     implementation(project(":feature:math-tools"))
     implementation(project(":feature:education-tools"))
     implementation(project(":feature:document-tools"))
+    implementation(project(":feature:games"))
+    implementation(project(":feature:personal-tools"))
+    implementation(project(":feature:peru-tools"))
+    implementation(project(":feature:readers"))
     implementation(project(":feature:sensor-tools"))
     implementation(project(":feature:location-tools"))
     implementation(project(":feature:audio"))

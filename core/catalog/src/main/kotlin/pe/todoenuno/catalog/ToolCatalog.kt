@@ -10,7 +10,11 @@ enum class ToolCategory(val title: String) {
     UBICACION("Ubicación"),
     FINANZAS("Finanzas"),
     SISTEMA("Sistema"),
-    EDUCACION("Educación")
+    EDUCACION("Educación"),
+    JUEGOS("Juegos offline"),
+    PERSONAL("Personal"),
+    LECTURA("Biblioteca y lectura"),
+    PERU("Perú")
 }
 
 data class ToolDefinition(
@@ -61,6 +65,17 @@ object ToolCatalog {
         ToolDefinition("triangles", "Triángulos notables", "30°–60°–90°, 45° y 3–4–5", "📐", ToolCategory.EDUCACION),
         ToolDefinition("labels", "Etiquetas PDF", "Diseña etiquetas con QR y exporta A4", "🏷️", ToolCategory.PRODUCTIVIDAD),
         ToolDefinition("laserlevel", "Nivel con cámara", "Retícula láser virtual para alinear", "📸", ToolCategory.SENSORES),
+        ToolDefinition("snake", "Snake", "Juego de serpiente clásico con botones", "🐍", ToolCategory.JUEGOS),
+        ToolDefinition("blocks", "Bloques clásicos", "Coloca piezas y completa filas", "🧱", ToolCategory.JUEGOS),
+        ToolDefinition("shooter", "Nave espacial", "Avioncito arcade y disparos", "🚀", ToolCategory.JUEGOS),
+        ToolDefinition("photopdf", "Creador de PDF", "Componer hasta diez fotos en PDF", "🖼️", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("earthquakes", "Sismos en Perú", "Consulta datos oficiales del IGP", "🌎", ToolCategory.PERU),
+        ToolDefinition("idvault", "Mi DNI seguro", "Fotos cifradas en el teléfono", "🪪", ToolCategory.PERSONAL),
+        ToolDefinition("notes", "Notas rápidas", "Notas locales y búsqueda", "📒", ToolCategory.PERSONAL),
+        ToolDefinition("bible", "Biblia RV1909", "66 libros disponibles sin conexión", "📖", ToolCategory.LECTURA),
+        ToolDefinition("paintmix", "Mezclar colores", "Tabla y combinación de pinturas", "🎨", ToolCategory.PERSONAL),
+        ToolDefinition("constitution", "Constitución del Perú", "Importa la edición oficial para leer offline", "⚖️", ToolCategory.PERU),
+        ToolDefinition("recipes", "Recetario EPUB", "Importa libros y lee sin conexión", "🍲", ToolCategory.LECTURA),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }
