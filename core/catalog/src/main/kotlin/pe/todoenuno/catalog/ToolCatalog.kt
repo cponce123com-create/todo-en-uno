@@ -51,6 +51,10 @@ object ToolCatalog {
         ToolDefinition("age", "Calcular edad", "Años, meses y días", "📅", ToolCategory.CALCULO),
         ToolDefinition("bmi", "IMC", "Índice de masa corporal orientativo", "⚖️", ToolCategory.CALCULO),
         ToolDefinition("network", "Información de red", "Conexión y DNS", "📶", ToolCategory.SISTEMA),
+        ToolDefinition("solar", "Sol y Luna", "Amanecer, atardecer y fase lunar", "🌗", ToolCategory.UBICACION),
+        ToolDefinition("magnetic", "Campo magnético", "Sensor en microteslas", "🧲", ToolCategory.SENSORES),
+        ToolDefinition("tuner", "Afinador", "Detecta notas musicales", "🎸", ToolCategory.MULTIMEDIA),
+        ToolDefinition("distance", "Distancia entre puntos", "Dos coordenadas, distancia recta", "📐", ToolCategory.UBICACION),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }

@@ -33,6 +33,9 @@ fun ToolScreen(id: String) {
         "age" -> AgeScreen()
         "bmi" -> BmiScreen()
         "network" -> NetworkInfoScreen()
+        "solar" -> SolarLunarScreen()
+        "magnetic" -> MagneticFieldScreen()
+        "distance" -> DistanceCalculatorScreen()
         else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Herramienta no disponible")
         }

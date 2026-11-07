@@ -1,6 +1,8 @@
 package pe.todoenuno.utilities
 
 import android.Manifest
+import android.content.Intent
+import android.net.Uri
 import android.content.Context
 import android.content.pm.PackageManager
 import android.location.Location
@@ -59,9 +61,16 @@ fun GpsToolScreen() {
             Text("Precisión informada: ${it.accuracy.toInt()} m")
             Text("Altitud: ${if(it.hasAltitude()) formatGps(it.altitude)+" m" else "No disponible"}")
             Text("Velocidad: ${if(it.hasSpeed()) String.format(Locale.ROOT,"%.1f km/h",it.speed*3.6) else "No disponible"}")
+            Button(onClick={
+                val lat=formatGps(it.latitude)
+                val lon=formatGps(it.longitude)
+                val uri=Uri.parse("geo:$lat,$lon?q=$lat,$lon")
+                runCatching { context.startActivity(Intent(Intent.ACTION_VIEW,uri)) }
+                    .onFailure { message="No tienes instalada una aplicación que abra mapas." }
+            }) { Text("Abrir ubicación en una app de mapas") }
         } ?: Text(if(granted)"Buscando señal GPS… (puede requerir salir al exterior)" else "Permiso pendiente.")
         Text(message,style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
-        Text("Sin mapa por ahora. No se guardan ni envían las coordenadas.",
+        Text("Mapa externo opcional: al pulsar Abrir, compartes coordenadas con otra aplicación. No se guardan en Todo en Uno.",
             style=MaterialTheme.typography.bodySmall,color=MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

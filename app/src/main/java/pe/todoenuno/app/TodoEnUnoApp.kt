@@ -64,6 +64,7 @@ import pe.todoenuno.recorder.VoiceRecorderScreen
 import pe.todoenuno.finance.CurrencyScreen
 import pe.todoenuno.camera.CameraToolScreen
 import pe.todoenuno.recorder.SoundMeterScreen
+import pe.todoenuno.recorder.TunerScreen
 
 private val tabs = listOf("Inicio", "Herramientas", "Favoritos", "Ajustes")
 private val tabSymbols = listOf("⌂", "▦", "★", "⚙")
@@ -119,6 +120,7 @@ fun TodoEnUnoApp() {
                         "recorder" -> VoiceRecorderScreen()
                         "currency" -> CurrencyScreen()
                         "sound" -> SoundMeterScreen()
+                        "tuner" -> TunerScreen()
                         "mirror", "magnifier", "qrscan" -> CameraToolScreen(openedId.orEmpty())
                         else -> ToolScreen(openedId.orEmpty())
                     }
@@ -225,7 +227,7 @@ private fun WelcomeHeader() {
             Text("TODO EN UNO", color = Color(0xFFA8F0D8), style = MaterialTheme.typography.labelMedium)
             Text("Tus herramientas,\nen un solo lugar", color = Color.White, fontSize = 26.sp, lineHeight = 31.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(5.dp))
-            Text("25 herramientas · Rápido · Privado", color = Color(0xFFE1FFF6), style = MaterialTheme.typography.bodyMedium)
+            Text("33 herramientas · Rápido · Privado", color = Color(0xFFE1FFF6), style = MaterialTheme.typography.bodyMedium)
         }
     }
 }
@@ -283,7 +285,7 @@ private fun ToolCard(tool: ToolDefinition, favorite: Boolean, open: () -> Unit, 
 private fun SettingsPanel(modifier: Modifier = Modifier) {
     Column(modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Ajustes", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text("Todo en Uno · Versión 0.3.0", style = MaterialTheme.typography.titleMedium)
+        Text("Todo en Uno · Versión 0.4.0", style = MaterialTheme.typography.titleMedium)
         Text("Tema claro y oscuro: sigue la configuración del dispositivo.")
         Text("Tus favoritos se guardan solo en este teléfono.")
         Text("La mayoría de herramientas funciona sin conexión. Las divisas requieren Internet para actualizarse.")
