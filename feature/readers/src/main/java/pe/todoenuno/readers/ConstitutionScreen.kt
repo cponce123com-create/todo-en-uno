@@ -185,7 +185,8 @@ fun ConstitutionScreen() {
         }
         result.onSuccess{
             pages=it.first
-            image?.recycle()
+            // Compose puede seguir dibujando el bitmap anterior durante la recomposición.
+            // No reciclarlo aquí: el GC lo libera cuando deje de estar referenciado.
             image=it.second
         }.onFailure{error="No se pudo mostrar la página del PDF."}
     }
@@ -219,7 +220,22 @@ fun ConstitutionScreen() {
             val book=epubBook!!
             Text(book.title,style=MaterialTheme.typography.titleMedium)
             OutlinedTextField(value=epubSearch,onValueChange={epubSearch=it.take(100)},label={Text("Buscar en el texto")},modifier=Modifier.fillMaxWidth(),singleLine=true)
-            if(epubSearch.isNotBlank()) Text("Coincidencias en esta sección: "+Regex(Regex.escape(epubSearch),RegexOption.IGNORE_CASE).findAll(book.chapters[epubChapter].text).count())
+            if(epubSearch.isNotBlank()) {
+                val matches=remember(book,epubSearch) {
+                    book.chapters.mapIndexedNotNull { index,chapter ->
+                        if(chapter.text.contains(epubSearch,ignoreCase=true))index else null
+                    }
+                }
+                Text("Secciones con coincidencias: ${matches.size}")
+                Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                    Button(onClick={
+                        epubChapter=matches.firstOrNull { it>epubChapter } ?: matches.firstOrNull() ?: epubChapter
+                    },enabled=matches.isNotEmpty()){Text("Siguiente coincidencia")}
+                    Button(onClick={
+                        epubChapter=matches.lastOrNull { it<epubChapter } ?: matches.lastOrNull() ?: epubChapter
+                    },enabled=matches.isNotEmpty()){Text("Anterior")}
+                }
+            }
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
                 Button(onClick={epubChapter=(epubChapter-1).coerceAtLeast(0)},enabled=epubChapter>0){Text("‹")}
                 Text("Sección ${epubChapter+1}/${book.chapters.size}")
