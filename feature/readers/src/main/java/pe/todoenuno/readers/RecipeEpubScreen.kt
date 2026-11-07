@@ -43,7 +43,7 @@ fun RecipeEpubScreen() {
     var chapter by remember{mutableIntStateOf(prefs.getInt("chapter",0))}
     var font by remember{mutableFloatStateOf(18f)}
     var error by remember{mutableStateOf("")}
-    var loading by remember{mutableStateOf(false)}
+    var loading by remember{mutableStateOf(true)}
     var changed by remember{mutableIntStateOf(0)}
     val picker=rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
@@ -53,28 +53,17 @@ fun RecipeEpubScreen() {
             scope.launch {
                 runCatching{
                     withContext(Dispatchers.IO){
-                        file.parentFile?.mkdirs()
-                        context.contentResolver.openInputStream(uri)?.use { input->
-                            val temp=File(file.parentFile,"upload.tmp")
-                            temp.outputStream().use {out->
-                                val buffer=ByteArray(8192)
-                                var total=0L
-                                while(true){
-                                    val n=input.read(buffer)
-                                    if(n<0)break
-                                    total+=n
-                                    require(total<=30L*1024*1024){"Máximo EPUB 30 MB."}
-                                    out.write(buffer,0,n)
-                                }
-                            }
-                            require(temp.renameTo(file)){"No se pudo guardar el EPUB."}
+                        context.contentResolver.openInputStream(uri)?.use { input ->
+                            EpubImporter.importBook(input,file)
                         }?:error("Archivo no disponible")
-                        SimpleEpubReader.parse(file)
                     }
                 }.onSuccess{
                     book=it;chapter=0;prefs.edit().putInt("chapter",0).apply()
                     error="";changed++
-                }.onFailure{error="Importación fallida: ${it.message}"}
+                }.onFailure{
+                    if(it is kotlinx.coroutines.CancellationException)throw it
+                    error="Importación fallida: ${it.message}. Se conserva el libro anterior."
+                }
                 loading=false
             }
         }
@@ -84,8 +73,9 @@ fun RecipeEpubScreen() {
             loading=true
             book=runCatching{withContext(Dispatchers.IO){SimpleEpubReader.parse(file)}}
                 .onFailure{error="No se pudo abrir el EPUB guardado."}.getOrNull()
-            loading=false
+            chapter=chapter.coerceIn(0,((book?.chapters?.size?:1)-1).coerceAtLeast(0))
         }
+        loading=false
     }
     fun setChapter(index:Int){
         val newIndex=index.coerceIn(0,((book?.chapters?.size?:1)-1).coerceAtLeast(0))

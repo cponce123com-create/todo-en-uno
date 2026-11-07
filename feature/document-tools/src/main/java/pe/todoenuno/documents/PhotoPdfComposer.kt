@@ -41,6 +41,7 @@ object PhotoPdfComposer {
         try{
             repeat(count){pageNumber->
                 val page=pdf.startPage(PdfDocument.PageInfo.Builder(PAGE_W,PAGE_H,pageNumber+1).create())
+                try {
                 val canvas=page.canvas
                 canvas.drawColor(android.graphics.Color.WHITE)
                 for(slot in 0 until perPage) {
@@ -58,7 +59,7 @@ object PhotoPdfComposer {
                     val bitmap=readSampled(context,image.uri)
                     try {draw(canvas,bitmap,rect,image)} finally {bitmap.recycle()}
                 }
-                pdf.finishPage(page)
+                } finally {pdf.finishPage(page)}
             }
             pdf.writeTo(out)
         }finally{pdf.close()}
@@ -67,8 +68,9 @@ object PhotoPdfComposer {
     private fun readSampled(context:Context,uri:Uri):Bitmap {
         val resolver=context.contentResolver
         val bounds=BitmapFactory.Options().apply{inJustDecodeBounds=true}
-        resolver.openInputStream(uri)?.use{BitmapFactory.decodeStream(it,null,bounds)}
-            ?:error("No se pudo leer la fotografía")
+        val input=resolver.openInputStream(uri)?:error("No se pudo leer la fotografía")
+        // Bounds-only decoding returns null even for a valid image.
+        input.use{BitmapFactory.decodeStream(it,null,bounds)}
         require(bounds.outWidth>0 && bounds.outHeight>0){"Imagen no válida"}
         var sample=1
         while(max(bounds.outWidth,bounds.outHeight)/sample>2000)sample*=2

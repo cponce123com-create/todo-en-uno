@@ -80,3 +80,11 @@ Consulta [ROADMAP](docs/ROADMAP.md) para las funciones pendientes y el plan de p
 - Temporizador: conceder permiso durante una cuenta programa el aviso pendiente.
 - Grabaciones: exportación fuera del hilo de interfaz y preparación asíncrona del reproductor.
 - Sismos: orden cronológico antes de limitar resultados. Se consulta la capa histórica oficial Sismos Reportados del IGP, ordenada por fechaevento descendente, con hasta 30 reportes por consulta y 100 eventos guardados localmente.
+
+## Auditoría de lectores, PDF y emulador
+
+- El compositor PDF lee dimensiones sin interpretar el retorno nulo de la decodificación de límites como un error; cierra las páginas también si una imagen falla.
+- Recetario y Constitución comparten importación EPUB validada antes de reemplazar el libro, escritura atómica y limpieza de temporales.
+- Importar un PDF de Constitución activa su lectura y corrige índices de página restaurados fuera de rango.
+- CI comprueba acceso real a KVM y exige aceleración; utiliza 2 núcleos y 2 GB de RAM para el emulador. Un fallo de infraestructura no cuenta como ejecución de pruebas instrumentadas.
+- Se añaden pruebas instrumentadas con archivos EPUB e imágenes/PDF reales para estas regresiones.
