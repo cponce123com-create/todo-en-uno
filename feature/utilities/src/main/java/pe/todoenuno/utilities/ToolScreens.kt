@@ -21,6 +21,14 @@ fun ToolScreen(id: String) {
         "level" -> LevelScreen()
         "qr" -> QrGeneratorScreen()
         "password" -> PasswordGeneratorScreen()
+        "gps" -> GpsToolScreen()
+        "ruler" -> RulerScreen()
+        "pomodoro" -> PomodoroScreen()
+        "text" -> TextToolsScreen()
+        "color" -> ColorToolsScreen()
+        "finance" -> FinancialToolsScreen()
+        "morse" -> MorseToolsScreen()
+        "device" -> DeviceInfoScreen()
         else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Herramienta no disponible")
         }

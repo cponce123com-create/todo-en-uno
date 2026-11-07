@@ -40,3 +40,17 @@
 - Evolucionar a interfaces API/implementación para las funcionalidades complejas.
 - Integrar Hilt cuando aparezcan repositorios y servicios con dependencias compartidas.
 - No incorporar permisos de micrófono, cámara o ubicación hasta que una función los necesite.
+
+## 0.3.0 — Segunda expansión
+
+- [x] Grabadora de voz en primer plano con exportación SAF.
+- [x] Tipo de cambio con actualización manual y caché con fecha.
+- [x] GPS con solicitud de ubicación al entrar.
+- [x] Regla calibrable en pantalla, Pomodoro, herramientas de texto, RGB/HEX, cálculos financieros, Morse y datos del equipo.
+- [ ] Comprobar CI y testear en teléfono real micrófono, GPS y red.
+
+## Prioridades 0.4.0
+
+- Escáner QR usando cámara, lupa/espejo, sonómetro orientativo, alarma y cronómetro de vueltas.
+- Mapas y mediciones con proveedor cartográfico y soporte offline legítimo.
+- Reproducción y grabación avanzada con servicio en primer plano y controles persistentes.

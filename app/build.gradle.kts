@@ -12,8 +12,8 @@ android {
         applicationId = "pe.todoenuno.app"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
     }
 
     buildTypes {
@@ -36,6 +36,8 @@ dependencies {
     implementation(project(":core:catalog"))
     implementation(project(":feature:utilities"))
     implementation(project(":feature:audio"))
+    implementation(project(":feature:recorder"))
+    implementation(project(":feature:finance"))
     implementation(platform("androidx.compose:compose-bom:2025.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")

@@ -56,6 +56,8 @@ import pe.todoenuno.catalog.ToolCatalog
 import pe.todoenuno.catalog.ToolDefinition
 import pe.todoenuno.utilities.ToolScreen
 import pe.todoenuno.audio.AudioPlayerScreen
+import pe.todoenuno.recorder.VoiceRecorderScreen
+import pe.todoenuno.finance.CurrencyScreen
 
 private val tabs = listOf("Inicio", "Herramientas", "Favoritos", "Ajustes")
 private val tabSymbols = listOf("⌂", "▦", "★", "⚙")
@@ -105,7 +107,12 @@ fun TodoEnUnoApp() {
                 }
                 HorizontalDivider()
                 Box(modifier = Modifier.fillMaxSize()) {
-                    if (openedId == "audio") AudioPlayerScreen() else ToolScreen(openedId.orEmpty())
+                    when(openedId) {
+                        "audio" -> AudioPlayerScreen()
+                        "recorder" -> VoiceRecorderScreen()
+                        "currency" -> CurrencyScreen()
+                        else -> ToolScreen(openedId.orEmpty())
+                    }
                 }
             }
         } else if (tab == 3) {
@@ -213,10 +220,10 @@ private fun ToolCard(tool: ToolDefinition, favorite: Boolean, open: () -> Unit, 
 private fun SettingsPanel(modifier: Modifier = Modifier) {
     Column(modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Ajustes", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text("Todo en Uno · Versión 0.2.0", style = MaterialTheme.typography.titleMedium)
+        Text("Todo en Uno · Versión 0.3.0", style = MaterialTheme.typography.titleMedium)
         Text("Tema claro y oscuro: sigue la configuración del dispositivo.")
         Text("Tus favoritos se guardan solo en este teléfono.")
-        Text("Las herramientas y el reproductor de audio local funcionan sin conexión a internet.")
+        Text("La mayoría de herramientas funciona sin conexión. Las divisas requieren Internet para actualizarse.")
         Text("Desarrollado con Kotlin y Jetpack Compose.", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

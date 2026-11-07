@@ -6,7 +6,10 @@ enum class ToolCategory(val title: String) {
     TIEMPO("Tiempo"),
     SENSORES("Sensores"),
     PRODUCTIVIDAD("Productividad"),
-    MULTIMEDIA("Multimedia")
+    MULTIMEDIA("Multimedia"),
+    UBICACION("Ubicación"),
+    FINANZAS("Finanzas"),
+    SISTEMA("Sistema")
 }
 
 data class ToolDefinition(
@@ -30,6 +33,16 @@ object ToolCatalog {
         ToolDefinition("level", "Nivel", "Inclinación de superficies", "📐", ToolCategory.SENSORES),
         ToolDefinition("qr", "Crear código QR", "Genera códigos sin conexión", "🔳", ToolCategory.PRODUCTIVIDAD),
         ToolDefinition("password", "Contraseñas", "Crea claves aleatorias seguras", "🔐", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("recorder", "Grabadora", "Graba y exporta audios locales", "🎙️", ToolCategory.MULTIMEDIA),
+        ToolDefinition("currency", "Tipo de cambio", "Divisas con cotizaciones fechadas", "💱", ToolCategory.FINANZAS),
+        ToolDefinition("gps", "GPS", "Coordenadas y velocidad", "📍", ToolCategory.UBICACION),
+        ToolDefinition("ruler", "Regla", "Regla física calibrable en pantalla", "📏", ToolCategory.SENSORES),
+        ToolDefinition("pomodoro", "Pomodoro", "Enfoque y descansos", "🍅", ToolCategory.TIEMPO),
+        ToolDefinition("text", "Texto", "Contar, convertir y copiar", "📝", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("color", "Colores", "Paleta RGB y HEX", "🎨", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("finance", "Cálculos financieros", "Propinas, cuentas y préstamos", "💰", ToolCategory.FINANZAS),
+        ToolDefinition("morse", "Código Morse", "Convierte textos y señales", "📡", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("device", "Información del equipo", "Batería, RAM, versión Android", "📱", ToolCategory.SISTEMA),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }
