@@ -15,7 +15,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.ui.input.pointer.awaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
@@ -91,7 +90,6 @@ fun ParanormalScreen() {
             .background(MaterialTheme.colorScheme.secondaryContainer,RoundedCornerShape(12.dp))
             .pointerInput(Unit) {
                 awaitEachGesture {
-                    awaitPointerEventScope {
                         awaitFirstDown(requireUnconsumed=false)
                         do {
                             val event=awaitPointerEvent(PointerEventPass.Main)
@@ -102,7 +100,6 @@ fun ParanormalScreen() {
                                 pointerPosition=Offset(x,y)
                             }
                         } while(event.changes.any { it.pressed })
-                    }
                 }
             },contentAlignment=Alignment.Center) {
             Text("Arrastra el indicador: ${pointerPosition.x.toInt()}, ${pointerPosition.y.toInt()}")
