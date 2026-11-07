@@ -17,6 +17,10 @@ fun ToolScreen(id: String) {
         "flashlight" -> FlashlightScreen()
         "countdown" -> CountdownScreen()
         "worldclock" -> WorldClockScreen()
+        "compass" -> CompassScreen()
+        "level" -> LevelScreen()
+        "qr" -> QrGeneratorScreen()
+        "password" -> PasswordGeneratorScreen()
         else -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             Text("Herramienta no disponible")
         }

@@ -1,7 +1,13 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp" android:height="108dp"
     android:viewportWidth="108" android:viewportHeight="108">
-    <path android:fillColor="#114B5F" android:pathData="M0,0h108v108h-108z"/>
-    <path android:fillColor="#E5FCF5" android:pathData="M28,24h21v21h-21zM59,24h21v21h-21zM28,55h21v21h-21zM59,55h21v21h-21z"/>
-    <path android:fillColor="#20BCA5" android:pathData="M35,31h7v7h-7zM66,31h7v7h-7zM35,62h7v7h-7zM66,62h7v7h-7z"/>
+    <path android:fillColor="#0A4550" android:pathData="M0,0h108v108h-108z"/>
+    <!-- Sombras: mosaico elevado de cuatro herramientas. -->
+    <path android:fillColor="#06313B" android:pathData="M29,30h24v24h-24zM59,30h24v24h-24zM29,60h24v24h-24zM59,60h24v24h-24z"/>
+    <path android:fillColor="#B3FFF1" android:pathData="M24,24h24v24h-24zM54,24h24v24h-24zM24,54h24v24h-24zM54,54h24v24h-24z"/>
+    <path android:fillColor="#19B3A1" android:pathData="M28,31h16v13h-16zM58,31h16v13h-16zM28,61h16v13h-16zM58,61h16v13h-16z"/>
+    <path android:fillColor="#FFFFFF" android:pathData="M28,28h16v3h-16zM58,28h16v3h-16zM28,58h16v3h-16zM58,58h16v3h-16z"/>
+    <path android:fillColor="#E87B58" android:pathData="M34,34h4v7h-4zM31,36h10v3h-10zM60,34h12v3h-12zM60,39h12v3h-12z"/>
+    <path android:fillColor="#0A4550" android:pathData="M31,63h10v3h-10zM34,60h4v10h-4zM61,60h11v11h-11z"/>
+    <path android:fillColor="#B3FFF1" android:pathData="M64,63h5v5h-5z"/>
 </vector>

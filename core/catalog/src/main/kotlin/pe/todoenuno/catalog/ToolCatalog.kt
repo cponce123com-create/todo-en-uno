@@ -3,7 +3,10 @@ package pe.todoenuno.catalog
 enum class ToolCategory(val title: String) {
     RAPIDAS("Rápidas"),
     CALCULO("Cálculo"),
-    TIEMPO("Tiempo")
+    TIEMPO("Tiempo"),
+    SENSORES("Sensores"),
+    PRODUCTIVIDAD("Productividad"),
+    MULTIMEDIA("Multimedia")
 }
 
 data class ToolDefinition(
@@ -22,6 +25,11 @@ object ToolCatalog {
         ToolDefinition("stopwatch", "Cronómetro", "Tiempo con precisión", "⏱️", ToolCategory.TIEMPO),
         ToolDefinition("countdown", "Temporizador", "Cuenta regresiva en pantalla", "⏳", ToolCategory.TIEMPO),
         ToolDefinition("worldclock", "Reloj mundial", "Hora en distintas ciudades", "🌍", ToolCategory.TIEMPO),
+        ToolDefinition("audio", "Reproductor de audio", "Música y audios en segundo plano", "🎧", ToolCategory.MULTIMEDIA),
+        ToolDefinition("compass", "Brújula", "Orientación y puntos cardinales", "🧭", ToolCategory.SENSORES),
+        ToolDefinition("level", "Nivel", "Inclinación de superficies", "📐", ToolCategory.SENSORES),
+        ToolDefinition("qr", "Crear código QR", "Genera códigos sin conexión", "🔳", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("password", "Contraseñas", "Crea claves aleatorias seguras", "🔐", ToolCategory.PRODUCTIVIDAD),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }
