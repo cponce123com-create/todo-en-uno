@@ -13,6 +13,7 @@ android {
         applicationId = "pe.todoenuno.app"
         minSdk = 26
         targetSdk = 35
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         versionCode = 5
         versionName = "0.5.0"
     }
@@ -55,4 +56,8 @@ dependencies {
     implementation(libs.serialization.json)
     debugImplementation(libs.compose.tooling)
     testImplementation(libs.junit)
+    androidTestImplementation(platform(libs.compose.bom))
+    androidTestImplementation(libs.compose.ui.test.junit4)
+    androidTestImplementation(libs.androidx.test.ext.junit)
+    debugImplementation(libs.compose.ui.test.manifest)
 }

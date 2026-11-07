@@ -38,6 +38,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -100,6 +101,12 @@ fun TodoEnUnoApp() {
                             icon = { Text(tab.symbol, fontSize = 20.sp, modifier = Modifier.clearAndSetSemantics {}) },
                             label = { Text(tab.name) },
                             modifier = Modifier.semantics { contentDescription = tab.name }
+                                .testTag(when (tab.route) {
+                                    HomeRoute -> "tab_home"
+                                    AllToolsRoute -> "tab_all"
+                                    FavoritesRoute -> "tab_favorites"
+                                    else -> "tab_settings"
+                                })
                         )
                     }
                 }
@@ -173,7 +180,7 @@ private fun CatalogScreen(mode: CatalogMode, model: HomeViewModel, open: (String
             OutlinedTextField(
                 value = query,
                 onValueChange = model::onQueryChanged,
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth().testTag("tool_search"),
                 singleLine = true,
                 label = { Text("Buscar una herramienta") },
                 placeholder = { Text("Ej. kilómetros, linterna...") },
@@ -327,7 +334,7 @@ private fun ToolTile(
 ) {
     Card(
         onClick = open,
-        modifier = modifier.height(166.dp).semantics { contentDescription = "${tool.title}: ${tool.description}" },
+        modifier = modifier.height(166.dp).semantics { contentDescription = "${tool.title}: ${tool.description}" }.testTag("tool_${tool.id}"),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(18.dp)
     ) {
@@ -354,7 +361,7 @@ private fun ToolTile(
 private fun ToolCatalogCard(tool: ToolDefinition, favorite: Boolean, open: () -> Unit, toggle: () -> Unit) {
     Card(
         onClick = open,
-        modifier = Modifier.semantics { contentDescription = "${tool.title}: ${tool.description}" },
+        modifier = Modifier.semantics { contentDescription = "${tool.title}: ${tool.description}" }.testTag("tool_${tool.id}"),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainerLow),
         shape = RoundedCornerShape(20.dp)
     ) {
@@ -384,7 +391,7 @@ private fun FavoriteButton(tool: ToolDefinition, favorite: Boolean, toggle: () -
     val description = if (favorite) "Quitar ${tool.title} de favoritos" else "Añadir ${tool.title} a favoritos"
     TextButton(
         onClick = toggle,
-        modifier = Modifier.semantics { contentDescription = description },
+        modifier = Modifier.semantics { contentDescription = description }.testTag("favorite_${tool.id}"),
         contentPadding = PaddingValues(3.dp)
     ) {
         Text(
