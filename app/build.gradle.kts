@@ -44,6 +44,7 @@ dependencies {
     implementation(project(":feature:utilities"))
     implementation(project(":feature:math-tools"))
     implementation(project(":feature:education-tools"))
+    implementation(project(":feature:document-tools"))
     implementation(project(":feature:sensor-tools"))
     implementation(project(":feature:location-tools"))
     implementation(project(":feature:audio"))

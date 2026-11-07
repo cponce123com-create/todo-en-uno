@@ -20,3 +20,5 @@ include(":app", ":core:catalog", ":feature:utilities", ":feature:audio", ":featu
 include(":feature:math-tools", ":feature:sensor-tools", ":feature:location-tools")
 
 include(":feature:education-tools")
+
+include(":feature:document-tools")

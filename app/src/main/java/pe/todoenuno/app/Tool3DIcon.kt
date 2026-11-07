@@ -287,6 +287,19 @@ private fun renderGlyph(c:NativeCanvas,id:String){
             triangle(c,33f,63f,33f,42f,56f,63f,coral)
             line(c,33f,63f,43f,63f,navy,3f)
         }
+        "labels" -> {
+            rr(c,26f,22f,73f,73f,7f,ivory)
+            rr(c,33f,32f,66f,51f,3f,navy)
+            text(c,"PDF",49f,46f,13f,ivory)
+            text(c,"QR",49f,65f,13f,coral)
+        }
+        "laserlevel" -> {
+            rr(c,24f,30f,75f,69f,9f,navy)
+            rr(c,28f,34f,71f,65f,6f,ivory)
+            line(c,27f,50f,72f,50f,mint,4f)
+            line(c,50f,28f,50f,72f,mint,3f)
+            circle(c,50f,50f,5f,coral)
+        }
         else -> text(c,id.take(2).uppercase(),49f,58f,25f)
     }
 }

@@ -59,6 +59,8 @@ object ToolCatalog {
         ToolDefinition("periodic", "Tabla periódica", "118 elementos y sus familias", "⚛", ToolCategory.EDUCACION),
         ToolDefinition("physics", "Fórmulas de física", "Física básica con calculadora", "🧪", ToolCategory.EDUCACION),
         ToolDefinition("triangles", "Triángulos notables", "30°–60°–90°, 45° y 3–4–5", "📐", ToolCategory.EDUCACION),
+        ToolDefinition("labels", "Etiquetas PDF", "Diseña etiquetas con QR y exporta A4", "🏷️", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("laserlevel", "Nivel con cámara", "Retícula láser virtual para alinear", "📸", ToolCategory.SENSORES),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }
