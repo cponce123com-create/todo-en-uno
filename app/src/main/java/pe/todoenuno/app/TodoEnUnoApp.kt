@@ -2,6 +2,8 @@ package pe.todoenuno.app
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,6 +17,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.weight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -24,6 +27,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -54,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import pe.todoenuno.catalog.ToolCatalog
 import pe.todoenuno.catalog.ToolDefinition
+import pe.todoenuno.catalog.ToolCategory
 import pe.todoenuno.utilities.ToolScreen
 import pe.todoenuno.audio.AudioPlayerScreen
 import pe.todoenuno.recorder.VoiceRecorderScreen
@@ -73,6 +78,7 @@ fun TodoEnUnoApp() {
     var tab by rememberSaveable { mutableIntStateOf(0) }
     var query by rememberSaveable { mutableStateOf("") }
     var openedId by rememberSaveable { mutableStateOf<String?>(null) }
+    var selectedCategory by rememberSaveable { mutableStateOf("Todas") }
 
     BackHandler(openedId != null) { openedId = null }
 
@@ -124,9 +130,10 @@ fun TodoEnUnoApp() {
         } else {
             val tools = ToolCatalog.tools.filter { tool ->
                 (tab != 2 || tool.id in favorites) &&
+                    (tab != 1 || selectedCategory == "Todas" || tool.category.name == selectedCategory) &&
                     (query.isBlank() || (tool.title + " " + tool.description).contains(query.trim(), ignoreCase = true))
             }.let { result ->
-                if (tab == 0 && query.isBlank()) result.sortedWith(compareByDescending<ToolDefinition> { it.id in favorites }.thenBy { it.title }) else result
+                if (tab == 0 && query.isBlank()) result.sortedWith(compareByDescending<ToolDefinition> { it.id in favorites }.thenBy { it.title }).take(9) else result
             }
             LazyColumn(
                 modifier = Modifier.fillMaxSize().padding(padding),
@@ -152,6 +159,21 @@ fun TodoEnUnoApp() {
                         shape = RoundedCornerShape(18.dp),
                     )
                 }
+
+                if(tab==1) item {
+                    Row(modifier=Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                        horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                        FilterChip(selected=selectedCategory=="Todas",onClick={selectedCategory="Todas"},
+                            label={Text("Todas")})
+                        ToolCategory.entries.forEach { category ->
+                            FilterChip(
+                                selected=selectedCategory==category.name,
+                                onClick={selectedCategory=category.name},
+                                label={Text(category.title)}
+                            )
+                        }
+                    }
+                }
                 if (tools.isEmpty()) item {
                     Text(
                         if (tab == 2) "Aún no tienes herramientas favoritas. Marca una estrella en Herramientas." else "No encontramos herramientas con esa búsqueda.",
@@ -159,13 +181,32 @@ fun TodoEnUnoApp() {
                         modifier = Modifier.padding(vertical = 28.dp)
                     )
                 }
-                items(tools, key = { it.id }) { tool ->
-                    ToolCard(
-                        tool = tool,
-                        favorite = tool.id in favorites,
-                        open = { openedId = tool.id },
-                        toggle = { scope.launch { favoritesStore.toggle(tool.id) } },
-                    )
+                if(tab==0 || tab==2){
+                    items(tools.chunked(3),key={it.first().id}) { chunk ->
+                        Row(modifier=Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(9.dp)){
+                            chunk.forEach { tool ->
+                                ToolTile(
+                                    modifier=Modifier.weight(1f),
+                                    tool=tool,favorite=tool.id in favorites,
+                                    open={openedId=tool.id},
+                                    toggle={scope.launch{favoritesStore.toggle(tool.id)}}
+                                )
+                            }
+                            repeat(3-chunk.size){ Spacer(Modifier.weight(1f)) }
+                        }
+                    }
+                    if(tab==0 && query.isBlank()) item {
+                        TextButton(onClick={tab=1}) {Text("Ver todas las herramientas")}
+                    }
+                } else {
+                    items(tools, key = { it.id }) { tool ->
+                        ToolCard(
+                            tool = tool,
+                            favorite = tool.id in favorites,
+                            open = { openedId = tool.id },
+                            toggle = { scope.launch { favoritesStore.toggle(tool.id) } },
+                        )
+                    }
                 }
             }
         }
@@ -185,7 +226,26 @@ private fun WelcomeHeader() {
             Text("TODO EN UNO", color = Color(0xFFA8F0D8), style = MaterialTheme.typography.labelMedium)
             Text("Tus herramientas,\nen un solo lugar", color = Color.White, fontSize = 26.sp, lineHeight = 31.sp, fontWeight = FontWeight.Bold)
             Spacer(Modifier.height(5.dp))
-            Text("Rápido · Privado · Sin conexión", color = Color(0xFFE1FFF6), style = MaterialTheme.typography.bodyMedium)
+            Text("25 herramientas · Rápido · Privado", color = Color(0xFFE1FFF6), style = MaterialTheme.typography.bodyMedium)
+        }
+    }
+}
+
+@Composable
+private fun ToolTile(modifier:Modifier,tool:ToolDefinition,favorite:Boolean,open:()->Unit,toggle:()->Unit){
+    Card(onClick=open,modifier=modifier.height(166.dp),
+        colors=CardDefaults.cardColors(containerColor=MaterialTheme.colorScheme.surfaceContainerLow),
+        shape=RoundedCornerShape(18.dp)){
+        Column(Modifier.fillMaxSize().padding(horizontal=4.dp,vertical=6.dp),
+            horizontalAlignment=Alignment.CenterHorizontally,
+            verticalArrangement=Arrangement.SpaceBetween) {
+            Tool3DIcon(tool)
+            Text(tool.title,style=MaterialTheme.typography.labelMedium,
+                fontWeight=FontWeight.SemiBold,maxLines=2,
+                overflow=TextOverflow.Ellipsis,textAlign=androidx.compose.ui.text.style.TextAlign.Center)
+            TextButton(onClick=toggle,contentPadding=PaddingValues(0.dp)){
+                Text(if(favorite)"★" else "☆",color=MaterialTheme.colorScheme.primary,fontSize=23.sp)
+            }
         }
     }
 }
