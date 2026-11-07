@@ -68,3 +68,16 @@
 - [ ] Mapas dentro de la app y medición AR de cámara.
 - [ ] Alarmas exactas con estrategia de permisos.
 - [ ] Validación manual de sensores, audio, linterna y notificaciones.
+
+## 0.5.0 — Arquitectura y accesibilidad
+
+- [x] NavHost Compose con rutas type-safe, deep link a herramientas y pantallas hijas.
+- [x] HomeViewModel con SavedStateHandle (búsqueda y categoría) y DataStore (favoritos).
+- [x] Filtros del catálogo separados y pruebas JVM de búsqueda y favoritos.
+- [x] Gradle Wrapper 8.13 y Version Catalog TOML.
+- [x] GitHub Actions ejecuta pruebas JVM, tests Android y lintDebug antes del APK.
+- [x] Mejoras de semántica TalkBack, etiquetas de favoritos y fondo dinámico Material 3.
+- [x] GPS declara y solicita ubicación aproximada + precisa al solicitar GPS preciso.
+- [ ] Pruebas instrumentadas de navegación y favoritos en emulador.
+- [ ] Refactor por dominios de feature:utilities; evaluar Hilt cuando haya dependencias complejas.
+- [ ] Auditoría de advertencias de Lint por herramientas y pruebas visuales de modo oscuro.

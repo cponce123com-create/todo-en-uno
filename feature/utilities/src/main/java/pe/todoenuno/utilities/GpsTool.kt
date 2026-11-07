@@ -40,7 +40,10 @@ fun GpsToolScreen() {
     ) }
     var location by remember { mutableStateOf<Location?>(null) }
     var message by remember { mutableStateOf("La ubicación solo se consulta con esta pantalla abierta.") }
-    val launcher=rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()){granted=it}
+    val launcher=rememberLauncherForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){ permissions ->
+        granted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
+        if (!granted) message = "Activa ubicación precisa para consultar GPS."
+    }
     DisposableEffect(granted,manager) {
         val listener=LocationListener { updated -> location=updated; message="Datos GPS recibidos" }
         if(granted) {
@@ -52,7 +55,7 @@ fun GpsToolScreen() {
     }
     Column(Modifier.fillMaxSize().padding(20.dp),verticalArrangement=Arrangement.spacedBy(17.dp)) {
         Text("GPS y coordenadas",style=MaterialTheme.typography.headlineSmall,fontWeight=FontWeight.Bold)
-        if(!granted) Button(onClick={launcher.launch(Manifest.permission.ACCESS_FINE_LOCATION)}){
+        if(!granted) Button(onClick={launcher.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION))}){
             Text("Autorizar ubicación precisa")
         }
         location?.let {

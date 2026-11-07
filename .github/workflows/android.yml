@@ -40,6 +40,16 @@ jobs:
           ./gradlew --version
       - name: Pruebas JVM globales, Lint y APK
         run: ./gradlew :core:catalog:test testDebugUnitTest lintDebug :app:assembleDebug --no-daemon --stacktrace
+      - name: Conservar informes Lint y JUnit
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: todo-en-uno-quality-reports
+          path: |
+            **/build/reports/lint-results-*.html
+            **/build/reports/tests/**
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Publicar APK
         if: success()
         uses: actions/upload-artifact@v4
