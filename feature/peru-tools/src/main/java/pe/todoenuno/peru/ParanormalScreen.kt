@@ -5,6 +5,8 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -40,6 +42,12 @@ fun ParanormalScreen() {
     var lamp by remember { mutableStateOf("APAGADA") }
     var light by remember { mutableIntStateOf(0) }
     var spiritText by remember { mutableStateOf("Silencio") }
+    var soundEnabled by remember { mutableStateOf(false) }
+    val tone=remember { runCatching { ToneGenerator(AudioManager.STREAM_MUSIC,45) }.getOrNull() }
+    DisposableEffect(tone) { onDispose { tone?.release() } }
+    fun beep() {
+        if(soundEnabled) runCatching { tone?.startTone(ToneGenerator.TONE_PROP_BEEP,120) }
+    }
     DisposableEffect(manager,sensor) {
         val listener=object:SensorEventListener {
             override fun onAccuracyChanged(sensor:Sensor?,accuracy:Int) {}
@@ -59,14 +67,20 @@ fun ParanormalScreen() {
         Text("Campo magnético físico: "+(field?.let { "%.1f µT".format(it) } ?: "Sensor no disponible"))
         Text("La lectura es del magnetómetro del móvil y puede variar por metales o aparatos eléctricos.")
         HorizontalDivider()
+        Row(verticalAlignment=Alignment.CenterVertically) {
+            Checkbox(checked=soundEnabled,onCheckedChange={soundEnabled=it})
+            Text("Activar pitidos breves (volumen multimedia)")
+        }
+        Text("Sonidos opcionales y simulados; sin grabación de micrófono ni destellos.",style=MaterialTheme.typography.bodySmall)
         Text("REM-POD virtual",style=MaterialTheme.typography.titleMedium)
         Text("Indicador luminoso simulado: nivel $light de 4")
-        Button(onClick={light=Random.nextInt(0,5)}){Text("Generar respuesta luminosa simulada")}
+        Button(onClick={light=Random.nextInt(0,5);beep()}){Text("Generar respuesta luminosa simulada")}
         HorizontalDivider()
         Text("Spirit box simulada",style=MaterialTheme.typography.titleMedium)
         Text(spiritText)
         Button(onClick={
             spiritText=listOf("…ruido blanco…","¿Hola?","…interferencia…","Aquí","…silencio…","Tal vez").random()
+            beep()
         }){Text("Simular barrido de voces")}
         Text("Las frases se generan aleatoriamente; no provienen de una comunicación real.",style=MaterialTheme.typography.bodySmall)
         HorizontalDivider()
