@@ -72,9 +72,9 @@ class ImportedGamesTest {
         assertEquals(322f,BreakoutEngine.paddle(BreakoutEngine.start(),1000f).paddle,0f)
     }
     @Test fun breakoutBrickHitAddsPointsAndRemovesBrick() {
-        val s=BreakoutState(ball=BallPoint(40f,82f),vx=0f,vy=-4.1f,launched=true)
+        val s=BreakoutState(ball=BallPoint(40f,190f),vx=0f,vy=-4.1f,launched=true)
         val next=BreakoutEngine.step(s,32)
-        assertEquals(10,next.score);assertFalse(0 in next.bricks);assertTrue(next.vy>0)
+        assertEquals(10,next.score);assertFalse(24 in next.bricks);assertTrue(next.vy>0)
     }
     @Test fun breakoutLastBrickWins() {
         val s=BreakoutState(ball=BallPoint(40f,82f),vx=0f,vy=-4.1f,launched=true,bricks=setOf(0))

@@ -46,3 +46,7 @@ No se importa toda la colección de Simon Tatham: esta integración selecciona F
 - `sgtpuzzles/app/src/main/jni/fifteen.c` en commit `d1e10eb57dd80af4999e698a9ab31f546e9a0b9d`: deslizamiento de fila/columna alineada y recuento por ficha desplazada. Se genera por movimientos legales aleatorios, se validan partidas guardadas por paridad y se sustituye el frontend C/JNI por Compose. No se portan el solucionador ni las pistas upstream.
 
 Pruebas añadidas: 18 casos JVM para fusiones, movimientos inválidos, restauración, paridad de Fifteen y física de Breakout, más 3 casos instrumentados de entrada, pausa y licencias. El tamaño del APK y el consumo en dispositivo se deben medir tras compilar; los tamaños del snapshot de la tabla anterior no representan el incremento de esta app.
+
+### Validación de motores
+
+Los tres archivos de motores y sus pruebas se compilaron con Kotlin 2.2.21/JVM 17 y se ejecutaron con JUnit 4.13.2: **30 pruebas aprobadas** (18 nuevas y 12 existentes). Esta ejecución independiente de Gradle valida la lógica pura; no sustituye la compilación Android, Lint ni las pruebas instrumentadas en emulador.

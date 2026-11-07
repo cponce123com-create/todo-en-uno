@@ -12,7 +12,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -145,9 +144,9 @@ internal fun FifteenGameScreen() {
 internal fun BreakoutGameScreen() {
     var state by remember{mutableStateOf(BreakoutEngine.start())}
     val ui=rememberGameUi("breakout",state.score,state.won||state.lost,state.lives)
-    LaunchedEffect(ui.active,ui.epoch) {
+    LaunchedEffect(ui.active,state.launched,ui.epoch) {
         var previous=0L
-        if(ui.active)while(isActive) {
+        if(ui.active && state.launched)while(isActive) {
             withFrameNanos { now ->
                 if(previous!=0L)state=BreakoutEngine.step(state,((now-previous)/1_000_000).coerceIn(1,48))
                 previous=now
