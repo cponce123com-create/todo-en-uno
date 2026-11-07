@@ -15,4 +15,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "TodoEnUno"
-include(":app", ":core:catalog", ":feature:utilities")
+include(":app", ":core:catalog", ":feature:utilities", ":feature:audio")

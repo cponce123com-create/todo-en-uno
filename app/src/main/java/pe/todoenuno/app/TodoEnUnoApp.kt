@@ -2,6 +2,7 @@ package pe.todoenuno.app
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -11,11 +12,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.shadow
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
@@ -41,6 +44,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -51,6 +55,7 @@ import kotlinx.coroutines.launch
 import pe.todoenuno.catalog.ToolCatalog
 import pe.todoenuno.catalog.ToolDefinition
 import pe.todoenuno.utilities.ToolScreen
+import pe.todoenuno.audio.AudioPlayerScreen
 
 private val tabs = listOf("Inicio", "Herramientas", "Favoritos", "Ajustes")
 private val tabSymbols = listOf("⌂", "▦", "★", "⚙")
@@ -100,7 +105,7 @@ fun TodoEnUnoApp() {
                 }
                 HorizontalDivider()
                 Box(modifier = Modifier.fillMaxSize()) {
-                    ToolScreen(openedId.orEmpty())
+                    if (openedId == "audio") AudioPlayerScreen() else ToolScreen(openedId.orEmpty())
                 }
             }
         } else if (tab == 3) {
@@ -186,11 +191,7 @@ private fun ToolCard(tool: ToolDefinition, favorite: Boolean, open: () -> Unit, 
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(14.dp)
         ) {
-            Box(
-                modifier = Modifier.size(56.dp)
-                    .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(16.dp)),
-                contentAlignment = Alignment.Center
-            ) { Text(tool.emoji, fontSize = 27.sp) }
+            Tool3DIcon(tool)
             Column(modifier = Modifier.weight(1f), verticalArrangement = Arrangement.spacedBy(3.dp)) {
                 Text(tool.title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.SemiBold)
                 Text(
@@ -212,10 +213,10 @@ private fun ToolCard(tool: ToolDefinition, favorite: Boolean, open: () -> Unit, 
 private fun SettingsPanel(modifier: Modifier = Modifier) {
     Column(modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Ajustes", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text("Todo en Uno · Versión 0.1.0", style = MaterialTheme.typography.titleMedium)
+        Text("Todo en Uno · Versión 0.2.0", style = MaterialTheme.typography.titleMedium)
         Text("Tema claro y oscuro: sigue la configuración del dispositivo.")
         Text("Tus favoritos se guardan solo en este teléfono.")
-        Text("Las herramientas incluidas funcionan sin conexión a internet.")
+        Text("Las herramientas y el reproductor de audio local funcionan sin conexión a internet.")
         Text("Desarrollado con Kotlin y Jetpack Compose.", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
