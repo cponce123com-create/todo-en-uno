@@ -55,11 +55,11 @@ object LabelPdf {
         }
         val titleColor=if(e.theme==LabelTheme.COMMERCIAL)Color.WHITE else ink
         val titleTop=if(e.theme==LabelTheme.COMMERCIAL)y+15 else y+21
-        text(c,e.title.take(28),x+10,titleTop,12f,titleColor,true)
+        text(c,e.title,x+10,titleTop,12f,titleColor,true,w-20f)
         val bodyTop=if(e.theme==LabelTheme.COMMERCIAL)y+38 else y+40
-        text(c,e.subtitle.take(40),x+10,bodyTop,9f,ink)
-        if(e.price.isNotBlank())text(c,e.price.take(18),x+10,bodyTop+18,13f,ink,true)
-        if(e.code.isNotBlank())text(c,"Código: ${e.code.take(22)}",x+10,y+h-12,8f,ink)
+        text(c,e.subtitle,x+10,bodyTop,9f,ink,maxWidth=if(qr!=null)w-70f else w-20f)
+        if(e.price.isNotBlank())text(c,e.price,x+10,bodyTop+18,13f,ink,true,if(qr!=null)w-70f else w-20f)
+        if(e.code.isNotBlank())text(c,"Código: ${e.code}",x+10,y+h-12,8f,ink,maxWidth=w-20f)
         if(qr!=null){
             val side=43f
             c.drawBitmap(qr,null,RectF(x+w-side-8,y+25,x+w-8,y+25+side),paint(Color.WHITE))
@@ -69,12 +69,21 @@ object LabelPdf {
         }
     }
 
-    private fun text(canvas:Canvas,value:String,x:Float,y:Float,size:Float,color:Int,bold:Boolean=false){
+    private fun text(
+        canvas:Canvas, value:String, x:Float, y:Float, size:Float, color:Int,
+        bold:Boolean=false, maxWidth:Float=160f
+    ){
         val p=paint(color).apply {
             textSize=size
             typeface=if(bold)Typeface.create(Typeface.DEFAULT,Typeface.BOLD) else Typeface.DEFAULT
         }
-        canvas.drawText(value,x,y,p)
+        var shortened=value.replace("\\n"," ").trim()
+        if(p.measureText(shortened)>maxWidth){
+            while(shortened.isNotEmpty() && p.measureText(shortened+"…")>maxWidth)
+                shortened=shortened.dropLast(1)
+            shortened+="…"
+        }
+        canvas.drawText(shortened,x,y,p)
     }
     private fun paint(color:Int)=Paint(Paint.ANTI_ALIAS_FLAG).apply{this.color=color}
     private fun qrBitmap(text:String):Bitmap {
