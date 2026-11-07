@@ -36,10 +36,16 @@ private fun weatherJson(url:String):JSONObject {
     }
     return try {
         require(conn.responseCode==200){"Servicio meteorológico no disponible"}
-        val raw=conn.inputStream.bufferedReader().use { reader ->
-            val text=reader.readText()
-            require(text.length<=100000){"Respuesta demasiado grande"}
-            text
+        val raw=conn.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
+            val buffer=CharArray(4096)
+            val result=StringBuilder()
+            while(true) {
+                val count=reader.read(buffer)
+                if(count<0)break
+                require(result.length+count<=100000){"Respuesta demasiado grande"}
+                result.append(buffer,0,count)
+            }
+            result.toString()
         }
         JSONObject(raw)
     } finally { conn.disconnect() }
