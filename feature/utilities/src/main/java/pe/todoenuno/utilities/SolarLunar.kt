@@ -50,7 +50,8 @@ object SunMath {
         if(!cosH.isFinite() || cosH < -1.0 || cosH > 1.0) return null
         val h=if(rising)360.0-deg(acos(cosH)) else deg(acos(cosH))
         val local=h/15.0+ra-(0.06571*t)-6.622
-        return (local-lngHour)*60.0
+        val utcMinutes=(local-lngHour)*60.0
+        return ((utcMinutes%1440.0)+1440.0)%1440.0
     }
     private fun norm(x:Double):Double=((x%360.0)+360.0)%360.0
     private fun rad(x:Double)=Math.toRadians(x)
