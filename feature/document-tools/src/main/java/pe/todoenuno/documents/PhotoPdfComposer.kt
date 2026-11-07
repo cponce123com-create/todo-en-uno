@@ -42,23 +42,23 @@ object PhotoPdfComposer {
             repeat(count){pageNumber->
                 val page=pdf.startPage(PdfDocument.PageInfo.Builder(PAGE_W,PAGE_H,pageNumber+1).create())
                 try {
-                val canvas=page.canvas
-                canvas.drawColor(android.graphics.Color.WHITE)
-                for(slot in 0 until perPage) {
-                    val index=pageNumber*perPage+slot
-                    if(index>=images.size)break
-                    val image=images[index]
-                    val margin=22f
-                    val gap=10f
-                    val width=(PAGE_W-2*margin-gap*(grid.columns-1))/grid.columns
-                    val height=(PAGE_H-2*margin-gap*(grid.rows-1))/grid.rows
-                    val col=slot%grid.columns
-                    val row=slot/grid.columns
-                    val rect=RectF(margin+col*(width+gap),margin+row*(height+gap),
-                        margin+col*(width+gap)+width,margin+row*(height+gap)+height)
-                    val bitmap=readSampled(context,image.uri)
-                    try {draw(canvas,bitmap,rect,image)} finally {bitmap.recycle()}
-                }
+                    val canvas=page.canvas
+                    canvas.drawColor(android.graphics.Color.WHITE)
+                    for(slot in 0 until perPage) {
+                        val index=pageNumber*perPage+slot
+                        if(index>=images.size)break
+                        val image=images[index]
+                        val margin=22f
+                        val gap=10f
+                        val width=(PAGE_W-2*margin-gap*(grid.columns-1))/grid.columns
+                        val height=(PAGE_H-2*margin-gap*(grid.rows-1))/grid.rows
+                        val col=slot%grid.columns
+                        val row=slot/grid.columns
+                        val rect=RectF(margin+col*(width+gap),margin+row*(height+gap),
+                            margin+col*(width+gap)+width,margin+row*(height+gap)+height)
+                        val bitmap=readSampled(context,image.uri)
+                        try {draw(canvas,bitmap,rect,image)} finally {bitmap.recycle()}
+                    }
                 } finally {pdf.finishPage(page)}
             }
             pdf.writeTo(out)

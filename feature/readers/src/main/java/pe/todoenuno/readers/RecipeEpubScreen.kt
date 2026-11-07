@@ -72,7 +72,10 @@ fun RecipeEpubScreen() {
         if(file.exists() && book==null){
             loading=true
             book=runCatching{withContext(Dispatchers.IO){SimpleEpubReader.parse(file)}}
-                .onFailure{error="No se pudo abrir el EPUB guardado."}.getOrNull()
+                .onFailure{
+                    if(it is kotlinx.coroutines.CancellationException)throw it
+                    error="No se pudo abrir el EPUB guardado."
+                }.getOrNull()
             chapter=chapter.coerceIn(0,((book?.chapters?.size?:1)-1).coerceAtLeast(0))
         }
         loading=false

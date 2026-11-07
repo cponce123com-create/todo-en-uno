@@ -65,12 +65,17 @@ fun ConstitutionScreen() {
     var documentLoaded by remember{mutableStateOf(file.exists())}
     var reloaded by remember{mutableIntStateOf(0)}
     var jump by remember{mutableStateOf("")}
-    var busy by remember{mutableStateOf(false)}
+    var busy by remember{mutableStateOf(true)}
     LaunchedEffect(Unit) {
         if(epubFile.exists()) epubBook=runCatching {
             withContext(Dispatchers.IO){SimpleEpubReader.parse(epubFile)}
+        }.onFailure {
+            if(it is kotlinx.coroutines.CancellationException)throw it
+            error="No se pudo abrir el EPUB guardado. Puedes importar otra edición."
         }.getOrNull()
         epubBook?.let { epubChapter=epubChapter.coerceIn(0,it.chapters.lastIndex) }
+        if(epubBook==null)epubMode=false
+        busy=false
     }
     val epubPicker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()){uri->
         if(uri!=null) {
@@ -83,7 +88,10 @@ fun ConstitutionScreen() {
                         }?:error("No se pudo abrir el EPUB")
                     }
                 }.onSuccess { epubBook=it;epubChapter=0;epubMode=true;error="" }
-                    .onFailure { error="No se pudo importar el EPUB: ${it.message}" }
+                    .onFailure {
+                        if(it is kotlinx.coroutines.CancellationException)throw it
+                        error="No se pudo importar el EPUB: ${it.message}"
+                    }
                 busy=false
             }
         }
