@@ -43,6 +43,10 @@ object ToolCatalog {
         ToolDefinition("finance", "Cálculos financieros", "Propinas, cuentas y préstamos", "💰", ToolCategory.FINANZAS),
         ToolDefinition("morse", "Código Morse", "Convierte textos y señales", "📡", ToolCategory.PRODUCTIVIDAD),
         ToolDefinition("device", "Información del equipo", "Batería, RAM, versión Android", "📱", ToolCategory.SISTEMA),
+        ToolDefinition("mirror", "Espejo", "Cámara frontal", "🪞", ToolCategory.MULTIMEDIA),
+        ToolDefinition("magnifier", "Lupa", "Ampliación con cámara trasera", "🔎", ToolCategory.MULTIMEDIA),
+        ToolDefinition("qrscan", "Escanear QR", "Lee códigos QR sin conexión", "📷", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("sound", "Sonómetro relativo", "Señal del micrófono en dBFS", "🔊", ToolCategory.SENSORES),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }

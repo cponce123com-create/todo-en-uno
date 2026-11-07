@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.weight
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -75,7 +74,7 @@ fun CameraToolScreen(mode:String) {
                 val cameraSelector=if(mode=="mirror")CameraSelector.DEFAULT_FRONT_CAMERA
                     else CameraSelector.DEFAULT_BACK_CAMERA
                 val preview=Preview.Builder().build().apply {
-                    surfaceProvider=previewView.surfaceProvider
+                    setSurfaceProvider(previewView.surfaceProvider)
                 }
                 ready.unbindAll()
                 if(mode=="qrscan") {

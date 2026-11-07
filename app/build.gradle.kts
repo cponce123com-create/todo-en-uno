@@ -38,6 +38,7 @@ dependencies {
     implementation(project(":feature:audio"))
     implementation(project(":feature:recorder"))
     implementation(project(":feature:finance"))
+    implementation(project(":feature:camera"))
     implementation(platform("androidx.compose:compose-bom:2025.10.01"))
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.foundation:foundation")

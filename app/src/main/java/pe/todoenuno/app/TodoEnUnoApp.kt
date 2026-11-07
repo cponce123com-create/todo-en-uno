@@ -58,6 +58,8 @@ import pe.todoenuno.utilities.ToolScreen
 import pe.todoenuno.audio.AudioPlayerScreen
 import pe.todoenuno.recorder.VoiceRecorderScreen
 import pe.todoenuno.finance.CurrencyScreen
+import pe.todoenuno.camera.CameraToolScreen
+import pe.todoenuno.recorder.SoundMeterScreen
 
 private val tabs = listOf("Inicio", "Herramientas", "Favoritos", "Ajustes")
 private val tabSymbols = listOf("⌂", "▦", "★", "⚙")
@@ -111,6 +113,8 @@ fun TodoEnUnoApp() {
                         "audio" -> AudioPlayerScreen()
                         "recorder" -> VoiceRecorderScreen()
                         "currency" -> CurrencyScreen()
+                        "sound" -> SoundMeterScreen()
+                        "mirror", "magnifier", "qrscan" -> CameraToolScreen(openedId.orEmpty())
                         else -> ToolScreen(openedId.orEmpty())
                     }
                 }
