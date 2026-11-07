@@ -1,4 +1,4 @@
-package pe.todoenuno.utilities
+package pe.todoenuno.math
 
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState

@@ -1,4 +1,4 @@
-package pe.todoenuno.utilities
+package pe.todoenuno.math
 
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
