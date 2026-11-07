@@ -61,6 +61,7 @@ import javax.crypto.spec.GCMParameterSpec
  * El acceso a la interfaz requiere credencial del bloqueo de pantalla.
  */
 class LocalIdVault(private val context:Context) {
+    companion object { private val storageLock=Any() }
     private val alias="todo_en_uno_private_id_aes_v1"
     private fun file(side:String):File {
         require(side=="front"||side=="back")
@@ -68,10 +69,9 @@ class LocalIdVault(private val context:Context) {
     }
     fun exists(side:String)=file(side).exists()
 
-    @Synchronized
-    private fun key():SecretKey {
+    private fun key():SecretKey = synchronized(storageLock) {
         val store=KeyStore.getInstance("AndroidKeyStore").apply{load(null)}
-        (store.getKey(alias,null) as? SecretKey)?.let{return it}
+        (store.getKey(alias,null) as? SecretKey)?.let{return@synchronized it}
         val generator=KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES,"AndroidKeyStore")
         generator.init(
             KeyGenParameterSpec.Builder(alias,
@@ -82,10 +82,9 @@ class LocalIdVault(private val context:Context) {
                 .setRandomizedEncryptionRequired(true)
                 .build()
         )
-        return generator.generateKey()
+        generator.generateKey()
     }
-    @Synchronized
-    fun save(side:String,raw:ByteArray) {
+    fun save(side:String,raw:ByteArray) = synchronized(storageLock) {
         require(raw.isNotEmpty() && raw.size<=12*1024*1024) {
             "La imagen no debe superar 12 MB."
         }
@@ -100,19 +99,18 @@ class LocalIdVault(private val context:Context) {
         }
         require(temp.renameTo(file(side))) { "No se pudo guardar el archivo cifrado." }
     }
-    fun load(side:String):ByteArray? {
+    fun load(side:String):ByteArray? = synchronized(storageLock) {
         val source=file(side)
-        if(!source.exists())return null
+        if(!source.exists())return@synchronized null
         val bytes=source.readBytes()
         require(bytes.size>30 && bytes.size<=13*1024*1024)
         val ivSize=bytes[0].toInt() and 0xFF
         require(ivSize==12)
         val cipher=Cipher.getInstance("AES/GCM/NoPadding")
         cipher.init(Cipher.DECRYPT_MODE,key(),GCMParameterSpec(128,bytes.copyOfRange(1,1+ivSize)))
-        return cipher.doFinal(bytes.copyOfRange(1+ivSize,bytes.size))
+        cipher.doFinal(bytes.copyOfRange(1+ivSize,bytes.size))
     }
-    @Synchronized
-    fun delete(side:String)=file(side).delete()
+    fun delete(side:String)=synchronized(storageLock){file(side).delete()}
 }
 
 @Composable
