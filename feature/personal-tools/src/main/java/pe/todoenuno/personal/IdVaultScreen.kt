@@ -44,6 +44,7 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.io.ByteArrayOutputStream
 import java.io.File
 import java.security.KeyStore
 import java.security.SecureRandom
@@ -144,14 +145,17 @@ fun IdVaultScreen() {
         }
     }
     fun show(side:String) {
-        if(!unlocked)return
         selected=side
         scope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
                     val data=vault.load(side)?:return@withContext null
                     try {
-                        val opts=BitmapFactory.Options().apply {inSampleSize=2}
+                        val bounds=BitmapFactory.Options().apply{inJustDecodeBounds=true}
+                        BitmapFactory.decodeByteArray(data,0,data.size,bounds)
+                        var sampling=1
+                        while(maxOf(bounds.outWidth,bounds.outHeight)/sampling>1600)sampling*=2
+                        val opts=BitmapFactory.Options().apply{inSampleSize=sampling}
                         BitmapFactory.decodeByteArray(data,0,data.size,opts)
                     } finally {data.fill(0)}
                 }
@@ -177,9 +181,15 @@ fun IdVaultScreen() {
             runCatching {
                 withContext(Dispatchers.IO) {
                     val raw=context.contentResolver.openInputStream(uri)?.use{input ->
-                        val bytes=input.readNBytes(12*1024*1024+1)
-                        require(bytes.size<=12*1024*1024){"La imagen es demasiado grande."}
-                        bytes
+                        val output=ByteArrayOutputStream()
+                        val chunk=ByteArray(8192)
+                        while(true) {
+                            val count=input.read(chunk)
+                            if(count<0)break
+                            require(output.size()+count<=12*1024*1024){"La imagen es demasiado grande."}
+                            output.write(chunk,0,count)
+                        }
+                        output.toByteArray()
                     }?:error("No se pudo abrir la foto.")
                     try {vault.save(selected,raw)} finally{raw.fill(0)}
                 }
