@@ -11,6 +11,10 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.awaitPointerEventScope
+import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -72,9 +76,19 @@ fun ParanormalScreen() {
         Box(Modifier.fillMaxWidth().height(72.dp)
             .background(MaterialTheme.colorScheme.secondaryContainer,RoundedCornerShape(12.dp))
             .pointerInput(Unit) {
-                detectDragGestures { change, _ ->
-                    pointerPosition=change.position
-                    change.consume()
+                awaitEachGesture {
+                    awaitPointerEventScope {
+                        awaitFirstDown(requireUnconsumed=false)
+                        do {
+                            val event=awaitPointerEvent(PointerEventPass.Main)
+                            val active=event.changes.filter { it.pressed }
+                            if(active.isNotEmpty()) {
+                                val x=active.map { it.position.x }.average().toFloat()
+                                val y=active.map { it.position.y }.average().toFloat()
+                                pointerPosition=Offset(x,y)
+                            }
+                        } while(event.changes.any { it.pressed })
+                    }
                 }
             },contentAlignment=Alignment.Center) {
             Text("Arrastra el indicador: ${pointerPosition.x.toInt()}, ${pointerPosition.y.toInt()}")
@@ -91,9 +105,9 @@ fun ParanormalScreen() {
             }
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            Button(onClick={boardLetter="SÍ";boardHistory+=" SÍ"}) { Text("SÍ") }
-            Button(onClick={boardLetter="NO";boardHistory+=" NO"}) { Text("NO") }
-            Button(onClick={boardLetter="ADIÓS";boardHistory+=" ADIÓS"}) { Text("ADIÓS") }
+            Button(onClick={boardLetter="SÍ";boardHistory=(boardHistory+" SÍ").takeLast(100)}) { Text("SÍ") }
+            Button(onClick={boardLetter="NO";boardHistory=(boardHistory+" NO").takeLast(100)}) { Text("NO") }
+            Button(onClick={boardLetter="ADIÓS";boardHistory=(boardHistory+" ADIÓS").takeLast(100)}) { Text("ADIÓS") }
         }
         Button(onClick={
             val letter=('A'..'Z').random()
@@ -114,6 +128,6 @@ fun ParanormalScreen() {
             contentAlignment=Alignment.Center
         ) { Text("Luz $lamp",color=Color.White) }
         Text("Las luces son estáticas, sin destellos.",style=MaterialTheme.typography.bodySmall)
-        Text("El arrastre es de un dedo. El control simultáneo de dos personas requiere una implementación multitáctil adicional.",style=MaterialTheme.typography.bodySmall)
+        Text("El indicador sigue el punto medio de los dedos que tocan el área; es un juego simulado y no detecta entidades.",style=MaterialTheme.typography.bodySmall)
     }
 }
