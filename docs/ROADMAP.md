@@ -10,10 +10,21 @@
 - [x] Confirmar compilación y pruebas en GitHub Actions (7 de noviembre de 2026).
 - [ ] Probar en dispositivos Android físicos.
 
-## 0.2.0: productividad
+## 0.2.0: audio y utilidades
+
+- [x] Reproductor de audio mediante Media3, con sesión multimedia y notificación de segundo plano.
+- [x] Brújula con sensor de rotación y fallback a acelerómetro/magnetómetro.
+- [x] Nivel de burbuja con acelerómetro.
+- [x] Generador QR sin Internet.
+- [x] Generador de contraseñas con SecureRandom.
+- [x] Iconos visuales con profundidad y relieve, sin añadir imágenes de gran tamaño al APK.
+- [ ] Pruebas reales de segundo plano en Android 8, 13 y 15.
+- [ ] Integrar paquete de iconos ilustrados 3D como recursos raster si se aprueban los diseños.
+
+## 0.2.1: productividad
 
 - Grabadora con permisos solicitados al usar y gestión de archivos mediante SAF/MediaStore.
-- Brújula con detección de sensor, calibración y mensajes de disponibilidad.
+- Mejorar calibración visual y precisión de brújula.
 - QR y códigos de barras con escáner local.
 - Conversor de divisas con tasas fechadas y fuente verificable.
 

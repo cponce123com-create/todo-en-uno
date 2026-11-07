@@ -2,10 +2,13 @@
 
 Centro de herramientas Android, desarrollado con Kotlin y Jetpack Compose. Aplicación en español, orientada a funcionar sin conexión.
 
-## Versión 0.1.0
+## Versión 0.2.0
 
 - Inicio con catálogo, búsqueda y favoritos persistentes.
 - Calculadora, linterna, conversor de unidades, cronómetro, temporizador y reloj mundial.
+- Reproductor de audio local (Media3 ExoPlayer + MediaSessionService) con control desde pantalla bloqueada y notificación.
+- Brújula magnética, nivel de burbuja, generador QR y contraseñas seguras.
+- Iconografía de estilo 3D ligero: relieve, sombras, brillos y colores por herramienta.
 - Interfaz Material 3 con modo claro/oscuro automático.
 - Arquitectura modular: `app`, `core:catalog`, `feature:utilities`.
 - APK de depuración generado por GitHub Actions, sin instalar Android Studio.
@@ -32,7 +35,7 @@ La navegación se centraliza en la app y las herramientas exponen interfaces dec
 
 ## Privacidad
 
-Sin inicio de sesión, sin anuncios, sin analíticas, sin conexiones de red y sin permisos generales de almacenamiento o micrófono en esta versión. Linterna solo funciona cuando el dispositivo dispone de flash compatible.
+Sin inicio de sesión, anuncios ni analíticas. La reproducción local no requiere permiso general de almacenamiento: el usuario selecciona sus archivos con el selector del sistema. El servicio de audio utiliza únicamente los permisos de primer plano exigidos por Android para reproducción multimedia; no pide micrófono ni acceso a la ubicación. El uso de sensores depende del equipo.
 
 ## Próximos pasos
 
