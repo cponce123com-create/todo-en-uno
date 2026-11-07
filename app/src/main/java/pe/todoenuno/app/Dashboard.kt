@@ -2,6 +2,7 @@ package pe.todoenuno.app
 
 import android.content.Context
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -37,6 +38,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.contentDescription
@@ -96,12 +99,58 @@ fun HomeDashboard(
                         RoundedCornerShape(26.dp)
                     )
             ) {
+                Canvas(Modifier.matchParentSize()) {
+                    val w=size.width
+                    val h=size.height
+                    val sun=Offset(w*0.78f,h*0.30f)
+                    drawCircle(
+                        brush=Brush.radialGradient(
+                            colors=listOf(Color(0xFFFFDE94).copy(alpha=.90f),
+                                Color(0xFFF8AA78).copy(alpha=.45f),
+                                Color.Transparent),
+                            center=sun,
+                            radius=h*0.50f
+                        ),
+                        radius=h*0.50f,center=sun
+                    )
+                    val distant=Path().apply {
+                        moveTo(0f,h*.78f)
+                        lineTo(w*.13f,h*.50f)
+                        lineTo(w*.24f,h*.60f)
+                        lineTo(w*.41f,h*.25f)
+                        lineTo(w*.55f,h*.58f)
+                        lineTo(w*.75f,h*.39f)
+                        lineTo(w,h*.71f)
+                        lineTo(w,h)
+                        lineTo(0f,h)
+                        close()
+                    }
+                    drawPath(distant,Color(0xFF6D7EAC).copy(alpha=.72f))
+                    val foreground=Path().apply {
+                        moveTo(0f,h*.90f)
+                        lineTo(w*.18f,h*.66f)
+                        lineTo(w*.30f,h*.76f)
+                        lineTo(w*.50f,h*.57f)
+                        lineTo(w*.67f,h*.85f)
+                        lineTo(w*.86f,h*.62f)
+                        lineTo(w,h*.82f)
+                        lineTo(w,h)
+                        lineTo(0f,h)
+                        close()
+                    }
+                    drawPath(foreground,Color(0xFF153847).copy(alpha=.80f))
+                    drawRect(
+                        Brush.verticalGradient(
+                            colors=listOf(Color(0x4407152C),Color(0xBB0C1434))
+                        )
+                    )
+                }
                 Column(
                     Modifier.fillMaxSize().padding(22.dp),
                     verticalArrangement=Arrangement.Center,
                     horizontalAlignment=Alignment.CenterHorizontally
                 ) {
-                    Text("🛠",fontSize=42.sp)
+                    Tool3DIcon(ToolCatalog.find("calculator")!!)
                     Text("Todo en Uno",fontSize=30.sp,color=Color.White,fontWeight=FontWeight.ExtraBold)
                     Text("${ToolCatalog.tools.size} herramientas en tu bolsillo",
                         color=Color(0xFFDDDEF5),style=MaterialTheme.typography.bodyMedium)
