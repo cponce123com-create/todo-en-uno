@@ -9,7 +9,8 @@ enum class ToolCategory(val title: String) {
     MULTIMEDIA("Multimedia"),
     UBICACION("Ubicación"),
     FINANZAS("Finanzas"),
-    SISTEMA("Sistema")
+    SISTEMA("Sistema"),
+    EDUCACION("Educación")
 }
 
 data class ToolDefinition(
@@ -55,6 +56,9 @@ object ToolCatalog {
         ToolDefinition("magnetic", "Campo magnético", "Sensor en microteslas", "🧲", ToolCategory.SENSORES),
         ToolDefinition("tuner", "Afinador", "Detecta notas musicales", "🎸", ToolCategory.MULTIMEDIA),
         ToolDefinition("distance", "Distancia entre puntos", "Dos coordenadas, distancia recta", "📐", ToolCategory.UBICACION),
+        ToolDefinition("periodic", "Tabla periódica", "118 elementos y sus familias", "⚛", ToolCategory.EDUCACION),
+        ToolDefinition("physics", "Fórmulas de física", "Física básica con calculadora", "🧪", ToolCategory.EDUCACION),
+        ToolDefinition("triangles", "Triángulos notables", "30°–60°–90°, 45° y 3–4–5", "📐", ToolCategory.EDUCACION),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }

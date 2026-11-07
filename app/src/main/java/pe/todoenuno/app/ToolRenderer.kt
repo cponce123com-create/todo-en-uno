@@ -4,6 +4,9 @@ import androidx.compose.runtime.Composable
 import pe.todoenuno.audio.AudioPlayerScreen
 import pe.todoenuno.camera.CameraToolScreen
 import pe.todoenuno.finance.CurrencyScreen
+import pe.todoenuno.education.PeriodicTableScreen
+import pe.todoenuno.education.PhysicsToolsScreen
+import pe.todoenuno.education.NotableTrianglesScreen
 import pe.todoenuno.location.LocationToolsScreen
 import pe.todoenuno.math.MathToolsScreen
 import pe.todoenuno.recorder.SoundMeterScreen
@@ -13,7 +16,7 @@ import pe.todoenuno.sensor.SensorToolsScreen
 import pe.todoenuno.utilities.ToolScreen
 
 /** Registrar por dominio evita acoplar las implementaciones del hardware al catálogo. */
-enum class ToolDomain { MATH, SENSOR, LOCATION, UTILITIES, AUDIO, RECORDER, FINANCE, CAMERA }
+enum class ToolDomain { MATH, SENSOR, LOCATION, UTILITIES, AUDIO, RECORDER, FINANCE, CAMERA, EDUCATION }
 
 object ToolRouting {
     private val math = setOf("calculator", "converter", "finance", "age", "bmi")
@@ -24,6 +27,7 @@ object ToolRouting {
         "text", "color", "morse", "device", "metronome", "network"
     )
     private val camera = setOf("mirror", "magnifier", "qrscan")
+    private val educational = setOf("periodic", "physics", "triangles")
     fun domain(id: String): ToolDomain? = when (id) {
         in math -> ToolDomain.MATH
         in sensors -> ToolDomain.SENSOR
@@ -33,6 +37,7 @@ object ToolRouting {
         "recorder", "sound", "tuner" -> ToolDomain.RECORDER
         "currency" -> ToolDomain.FINANCE
         in camera -> ToolDomain.CAMERA
+        in educational -> ToolDomain.EDUCATION
         else -> null
     }
 }
@@ -52,6 +57,11 @@ fun AppToolRenderer(id: String) {
         }
         ToolDomain.FINANCE -> CurrencyScreen()
         ToolDomain.CAMERA -> CameraToolScreen(id)
+        ToolDomain.EDUCATION -> when(id){
+            "periodic"->PeriodicTableScreen()
+            "physics"->PhysicsToolsScreen()
+            else->NotableTrianglesScreen()
+        }
         null -> androidx.compose.material3.Text("Herramienta no disponible")
     }
 }
