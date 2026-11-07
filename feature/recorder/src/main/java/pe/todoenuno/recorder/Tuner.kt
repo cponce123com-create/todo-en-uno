@@ -58,6 +58,7 @@ object PitchMath {
         if(power<0.00002)return null
         val minLag=(rate/1000).coerceAtLeast(1)
         val maxLag=(rate/65).coerceAtMost(n/3)
+        val correlation=DoubleArray(maxLag+1)
         var bestLag=0;var best=0.0
         for(lag in minLag..maxLag) {
             var cross=0.0;var s1=0.0;var s2=0.0
@@ -68,10 +69,26 @@ object PitchMath {
                 i+=2
             }
             val corr=cross/sqrt(s1*s2+1e-12)
+            correlation[lag]=corr
             if(corr>best){best=corr;bestLag=lag}
         }
         if(best<0.76 || bestLag==0)return null
-        return rate.toDouble()/bestLag
+        // Take the first strong periodic peak rather than the maximum peak,
+        // which may be a multiple of the period (octave error).
+        val threshold=maxOf(0.82,best*0.90)
+        val fundamental=((minLag+1) until maxLag).firstOrNull { lag ->
+            correlation[lag]>=threshold &&
+            correlation[lag]>=correlation[lag-1] &&
+            correlation[lag]>=correlation[lag+1]
+        } ?:bestLag
+        // Parabolic interpolation around the discrete correlation maximum.
+        val left=correlation[(fundamental-1).coerceAtLeast(minLag)]
+        val mid=correlation[fundamental]
+        val right=correlation[(fundamental+1).coerceAtMost(maxLag)]
+        val curvature=left-2.0*mid+right
+        val correction=if(kotlin.math.abs(curvature)>1e-9)
+            (0.5*(left-right)/curvature).coerceIn(-0.5,0.5) else 0.0
+        return rate/(fundamental+correction)
     }
 }
 
