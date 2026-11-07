@@ -2,6 +2,15 @@ package pe.todoenuno.app
 
 import androidx.compose.runtime.Composable
 import pe.todoenuno.audio.AudioPlayerScreen
+import pe.todoenuno.games.GamesScreen
+import pe.todoenuno.personal.QuickNotesScreen
+import pe.todoenuno.personal.PainterColorsScreen
+import pe.todoenuno.personal.IdVaultScreen
+import pe.todoenuno.peru.EarthquakesPeruScreen
+import pe.todoenuno.readers.BibleScreen
+import pe.todoenuno.readers.RecipeEpubScreen
+import pe.todoenuno.readers.ConstitutionScreen
+import pe.todoenuno.documents.PhotoPdfComposerScreen
 import pe.todoenuno.camera.CameraToolScreen
 import pe.todoenuno.camera.CameraLaserLevelScreen
 import pe.todoenuno.documents.LabelDesignerScreen
@@ -18,7 +27,7 @@ import pe.todoenuno.sensor.SensorToolsScreen
 import pe.todoenuno.utilities.ToolScreen
 
 /** Registrar por dominio evita acoplar las implementaciones del hardware al catálogo. */
-enum class ToolDomain { MATH, SENSOR, LOCATION, UTILITIES, AUDIO, RECORDER, FINANCE, CAMERA, EDUCATION, DOCUMENTS }
+enum class ToolDomain { MATH, SENSOR, LOCATION, UTILITIES, AUDIO, RECORDER, FINANCE, CAMERA, EDUCATION, DOCUMENTS, GAMES, PERSONAL, PERU, READERS }
 
 object ToolRouting {
     private val math = setOf("calculator", "converter", "finance", "age", "bmi")
@@ -30,6 +39,10 @@ object ToolRouting {
     )
     private val camera = setOf("mirror", "magnifier", "qrscan","laserlevel")
     private val educational = setOf("periodic", "physics", "triangles")
+    private val games = setOf("snake","blocks","shooter")
+    private val personal = setOf("notes","idvault","paintmix")
+    private val peruvian = setOf("earthquakes","constitution")
+    private val reading = setOf("bible","recipes")
     fun domain(id: String): ToolDomain? = when (id) {
         in math -> ToolDomain.MATH
         in sensors -> ToolDomain.SENSOR
@@ -40,7 +53,11 @@ object ToolRouting {
         "currency" -> ToolDomain.FINANCE
         in camera -> ToolDomain.CAMERA
         in educational -> ToolDomain.EDUCATION
-        "labels" -> ToolDomain.DOCUMENTS
+        "labels","photopdf" -> ToolDomain.DOCUMENTS
+        in games -> ToolDomain.GAMES
+        in personal -> ToolDomain.PERSONAL
+        in peruvian -> ToolDomain.PERU
+        in reading -> ToolDomain.READERS
         else -> null
     }
 }
@@ -60,7 +77,15 @@ fun AppToolRenderer(id: String) {
         }
         ToolDomain.FINANCE -> CurrencyScreen()
         ToolDomain.CAMERA -> if(id=="laserlevel")CameraLaserLevelScreen() else CameraToolScreen(id)
-        ToolDomain.DOCUMENTS -> LabelDesignerScreen()
+        ToolDomain.DOCUMENTS -> if(id=="photopdf")PhotoPdfComposerScreen() else LabelDesignerScreen()
+        ToolDomain.GAMES -> GamesScreen(id)
+        ToolDomain.PERSONAL -> when(id) {
+            "idvault" -> IdVaultScreen()
+            "notes" -> QuickNotesScreen()
+            else -> PainterColorsScreen()
+        }
+        ToolDomain.PERU -> if(id=="earthquakes")EarthquakesPeruScreen() else ConstitutionScreen()
+        ToolDomain.READERS -> if(id=="bible")BibleScreen() else RecipeEpubScreen()
         ToolDomain.EDUCATION -> when(id){
             "periodic"->PeriodicTableScreen()
             "physics"->PhysicsToolsScreen()

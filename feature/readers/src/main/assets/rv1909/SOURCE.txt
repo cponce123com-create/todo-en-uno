@@ -1,0 +1,5 @@
+Reina Valera 1909 — dominio público (CC0).
+Fuente: BibleAquifer/ReinaValera1909 (https://github.com/BibleAquifer/ReinaValera1909)
+Contenido: libros 01–66, exportación JSON original por libro bajo spa/json.
+Fecha de incorporación: 2026-11-07.
+Este paquete incluye únicamente la edición 1909. La revisión Reina-Valera 1960 NO está incluida.

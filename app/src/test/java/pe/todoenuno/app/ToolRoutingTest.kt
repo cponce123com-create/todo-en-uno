@@ -11,7 +11,7 @@ class ToolRoutingTest {
         ToolCatalog.tools.forEach { tool ->
             assertNotNull("Falta ruta: ${tool.id}", ToolRouting.domain(tool.id))
         }
-        assertEquals(38, ToolCatalog.tools.size)
+        assertEquals(49, ToolCatalog.tools.size)
     }
 
     @Test fun invalidIdDoesNotCrashNavigation() {
