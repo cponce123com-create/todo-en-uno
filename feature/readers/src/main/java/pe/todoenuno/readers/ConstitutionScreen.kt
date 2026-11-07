@@ -18,6 +18,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.Slider
+import androidx.compose.ui.unit.sp
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
@@ -48,6 +51,11 @@ fun ConstitutionScreen() {
     val context=LocalContext.current
     val scope=rememberCoroutineScope()
     val file=remember(context){File(context.filesDir,"legal/constitucion-peru.pdf")}
+    val epubFile=remember(context){File(context.filesDir,"legal/constitucion-peru.epub")}
+    var epubBook by remember { mutableStateOf<EpubBook?>(null) }
+    var epubChapter by remember { mutableIntStateOf(0) }
+    var epubFont by remember { mutableStateOf(18f) }
+    var epubMode by remember { mutableStateOf(false) }
     val prefs=remember(context){context.getSharedPreferences("constitution_reader",0)}
     var page by remember{mutableIntStateOf(prefs.getInt("page",0))}
     var pages by remember{mutableIntStateOf(0)}
@@ -57,6 +65,53 @@ fun ConstitutionScreen() {
     var reloaded by remember{mutableIntStateOf(0)}
     var jump by remember{mutableStateOf("")}
     var busy by remember{mutableStateOf(false)}
+    LaunchedEffect(Unit) {
+        if(epubFile.exists()) epubBook=runCatching {
+            withContext(Dispatchers.IO){SimpleEpubReader.parse(epubFile)}
+        }.getOrNull()
+    }
+    val epubPicker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()){uri->
+        if(uri!=null) {
+            busy=true
+            scope.launch {
+                runCatching {
+                    withContext(Dispatchers.IO) {
+                        epubFile.parentFile?.mkdirs()
+                        val temp=File(epubFile.parentFile,"constitution-epub.tmp")
+                        try {
+                            context.contentResolver.openInputStream(uri)?.use { input ->
+                                temp.outputStream().use { output ->
+                                    val buffer=ByteArray(8192)
+                                    var total=0L
+                                    while(true) {
+                                        val count=input.read(buffer)
+                                        if(count<0)break
+                                        total+=count
+                                        require(total<=30L*1024*1024){"Máximo 30 MB."}
+                                        output.write(buffer,0,count)
+                                    }
+                                }
+                            } ?: error("No se pudo abrir el EPUB")
+                            val parsed=SimpleEpubReader.parse(temp)
+                            val backup=File(epubFile.parentFile,"constitution-epub.previous")
+                            if(epubFile.exists()) {
+                                backup.delete()
+                                require(epubFile.renameTo(backup)){"No se pudo respaldar el EPUB anterior"}
+                            }
+                            if(!temp.renameTo(epubFile)) {
+                                if(backup.exists()) check(backup.renameTo(epubFile)){"No se pudo restaurar el EPUB anterior"}
+                                throw IllegalStateException("No se pudo guardar el EPUB")
+                            }
+                            backup.delete()
+                            parsed
+                        } finally { temp.delete() }
+                    }
+                }.onSuccess { epubBook=it;epubChapter=0;epubMode=true;error="" }
+                    .onFailure { error="No se pudo importar el EPUB: ${it.message}" }
+                busy=false
+            }
+        }
+    }
     val picker=rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ){uri->
@@ -150,7 +205,31 @@ fun ConstitutionScreen() {
             Text(if(busy)"Importando…" else "Importar y guardar PDF oficial")
         }
         if(error.isNotBlank())Text(error,color=MaterialTheme.colorScheme.error)
-        if(documentLoaded){
+        Button(onClick={epubPicker.launch(arrayOf("application/epub+zip","application/octet-stream"))},enabled=!busy){
+            Text(if(busy)"Importando…" else "Importar edición EPUB")
+        }
+        if(epubBook!=null) {
+            Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                Button(onClick={epubMode=true}){Text("Leer EPUB")}
+                if(documentLoaded) Button(onClick={epubMode=false}){Text("Leer PDF")}
+            }
+        }
+        if(epubMode && epubBook!=null) {
+            val book=epubBook!!
+            Text(book.title,style=MaterialTheme.typography.titleMedium)
+            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
+                Button(onClick={epubChapter=(epubChapter-1).coerceAtLeast(0)},enabled=epubChapter>0){Text("‹")}
+                Text("Sección ${epubChapter+1}/${book.chapters.size}")
+                Button(onClick={epubChapter=(epubChapter+1).coerceAtMost(book.chapters.lastIndex)},enabled=epubChapter<book.chapters.lastIndex){Text("›")}
+            }
+            Slider(value=epubFont,onValueChange={epubFont=it},valueRange=14f..28f)
+            LazyColumn(Modifier.weight(1f)) {
+                item {
+                    Text(book.chapters[epubChapter].title,style=MaterialTheme.typography.titleMedium)
+                    Text(book.chapters[epubChapter].text,fontSize=epubFont.sp,lineHeight=(epubFont+6).sp)
+                }
+            }
+        } else if(documentLoaded){
             Row(horizontalArrangement=Arrangement.SpaceEvenly,modifier=Modifier.fillMaxWidth()){
                 Button(onClick={setPage(page-1)},enabled=page>0){Text("‹")}
                 Text("Página ${page+1}/$pages",modifier=Modifier.padding(top=12.dp))
@@ -172,6 +251,7 @@ fun ConstitutionScreen() {
         }else{
             Text("Aún no se ha importado una edición oficial. Abre el sitio del Congreso, descarga el PDF e impórtalo aquí. Después podrás consultarlo sin Internet.")
         }
+        Text("Verifica la procedencia y vigencia de cualquier EPUB: no se garantiza que exista una edición EPUB oficial.",style=MaterialTheme.typography.bodySmall)
         Text("Las normas pueden modificarse. Verifica la fecha y edición de tu documento frente al portal oficial; el lector no actualiza automáticamente su contenido.",
             color=MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.bodySmall)
     }
