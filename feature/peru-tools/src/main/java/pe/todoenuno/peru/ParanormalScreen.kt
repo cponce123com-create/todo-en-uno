@@ -10,6 +10,9 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
@@ -28,6 +31,7 @@ fun ParanormalScreen() {
     val sensor=remember(manager){manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)}
     var field by remember { mutableStateOf<Float?>(null) }
     var boardLetter by remember { mutableStateOf("INICIO") }
+    var pointerPosition by remember { mutableStateOf(Offset.Zero) }
     var boardHistory by remember { mutableStateOf("") }
     var lamp by remember { mutableStateOf("APAGADA") }
     var light by remember { mutableIntStateOf(0) }
@@ -65,6 +69,16 @@ fun ParanormalScreen() {
         Text("Tablero Ouija virtual",style=MaterialTheme.typography.titleMedium)
         Text("Juego recreativo: selecciona letras o genera movimientos aleatorios. No detecta espíritus.")
         Text("Indicador: $boardLetter",style=MaterialTheme.typography.titleLarge)
+        Box(Modifier.fillMaxWidth().height(72.dp)
+            .background(MaterialTheme.colorScheme.secondaryContainer,RoundedCornerShape(12.dp))
+            .pointerInput(Unit) {
+                detectDragGestures { change, _ ->
+                    pointerPosition=change.position
+                    change.consume()
+                }
+            },contentAlignment=Alignment.Center) {
+            Text("Arrastra el indicador: ${pointerPosition.x.toInt()}, ${pointerPosition.y.toInt()}")
+        }
         listOf("ABCDEFGHI","JKLMNOPQR","STUVWXYZ").forEach { letters ->
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(2.dp)) {
                 letters.forEach { letter ->
@@ -100,5 +114,6 @@ fun ParanormalScreen() {
             contentAlignment=Alignment.Center
         ) { Text("Luz $lamp",color=Color.White) }
         Text("Las luces son estáticas, sin destellos.",style=MaterialTheme.typography.bodySmall)
+        Text("El arrastre es de un dedo. El control simultáneo de dos personas requiere una implementación multitáctil adicional.",style=MaterialTheme.typography.bodySmall)
     }
 }
