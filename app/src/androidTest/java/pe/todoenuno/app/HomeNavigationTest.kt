@@ -19,7 +19,7 @@ import org.junit.runner.RunWith
 class HomeNavigationTest {
     @get:Rule val compose = createAndroidComposeRule<MainActivity>()
 
-    @Test fun toolGuideReturnsToToolBeforeCatalog() {
+    @Test fun navigationAndFavoritesWorkInOneSession() {
         compose.onNodeWithTag("tab_all").performClick()
         compose.onNodeWithTag("tool_search").performTextInput("calculadora")
         compose.onNodeWithTag("tool_calculator").performClick()
@@ -29,16 +29,11 @@ class HomeNavigationTest {
         compose.onNodeWithText("Información").assertExists()
         compose.onNodeWithText("‹ Volver").performClick()
         compose.onNodeWithTag("tab_all").assertExists()
-    }
 
-    @Test fun favoriteCanBeAddedAndRemovedFromUi() {
         compose.onNodeWithTag("tab_all").performClick()
         compose.onNodeWithTag("tool_search").performTextInput("metrónomo")
         val add = "Añadir Metrónomo a favoritos"
-        if (compose.onAllNodes(androidx.compose.ui.test.hasContentDescription(add))
-                .fetchSemanticsNodes().isNotEmpty()) {
-            compose.onNodeWithContentDescription(add).performClick()
-        }
+        compose.onNodeWithContentDescription(add).performClick()
         compose.onNodeWithTag("tab_favorites").performClick()
         compose.waitUntil(7_000) {
             compose.onAllNodes(androidx.compose.ui.test.hasTestTag("tool_metronome"))
