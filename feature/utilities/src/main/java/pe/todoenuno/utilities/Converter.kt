@@ -39,6 +39,26 @@ enum class UnitGroup(val title: String, val units: List<UnitChoice>) {
         UnitChoice("kg", "Kilogramos", 1.0), UnitChoice("g", "Gramos", 0.001),
         UnitChoice("lb", "Libras", 0.45359237), UnitChoice("oz", "Onzas", 0.028349523125)
     )),
+    AREA("Área", listOf(
+        UnitChoice("m2", "Metros cuadrados", 1.0), UnitChoice("km2", "Kilómetros cuadrados", 1e6),
+        UnitChoice("ha", "Hectáreas", 10000.0), UnitChoice("ft2", "Pies cuadrados", 0.09290304)
+    )),
+    VOLUME("Volumen", listOf(
+        UnitChoice("L", "Litros", 1.0), UnitChoice("mL", "Mililitros", 0.001),
+        UnitChoice("m3", "Metros cúbicos", 1000.0), UnitChoice("gal", "Galones US", 3.785411784)
+    )),
+    SPEED("Velocidad", listOf(
+        UnitChoice("kmh", "km/h", 1.0), UnitChoice("ms", "m/s", 3.6),
+        UnitChoice("mph", "Millas/h", 1.609344), UnitChoice("kn", "Nudos", 1.852)
+    )),
+    DATA("Informática", listOf(
+        UnitChoice("B", "Bytes", 1.0), UnitChoice("KiB", "KiB", 1024.0),
+        UnitChoice("MiB", "MiB", 1048576.0), UnitChoice("GiB", "GiB", 1073741824.0)
+    )),
+    TIME("Tiempo", listOf(
+        UnitChoice("s", "Segundos", 1.0), UnitChoice("min", "Minutos", 60.0),
+        UnitChoice("h", "Horas", 3600.0), UnitChoice("day", "Días", 86400.0)
+    )),
     TEMP("Temperatura", listOf(
         UnitChoice("C", "Celsius", 1.0), UnitChoice("F", "Fahrenheit", 1.0),
         UnitChoice("K", "Kelvin", 1.0)
@@ -65,7 +85,7 @@ fun ConverterScreen() {
     var to by remember(group) { mutableStateOf(group.units[1].id) }
     var number by rememberSaveable { mutableStateOf("1") }
     val input = number.replace(',', '.').toDoubleOrNull()
-    val result = if (input != null && input.isFinite()) UnitConverter.convert(input, group, from, to) else null
+    val result = if (input != null && input.isFinite()) UnitConverter.convert(input, group, from, to).takeIf { it.isFinite() } else null
     val formatter = remember { DecimalFormat("#,##0.######", DecimalFormatSymbols(Locale.forLanguageTag("es-PE"))) }
 
     Column(
@@ -101,6 +121,6 @@ fun ConverterScreen() {
             style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.primary,
             fontWeight = FontWeight.Bold
         )
-        Text("Cálculos disponibles sin conexión.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text("Longitud, masa, área, volumen, velocidad, datos (base 1024), tiempo y temperatura. Sin conexión.", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }
