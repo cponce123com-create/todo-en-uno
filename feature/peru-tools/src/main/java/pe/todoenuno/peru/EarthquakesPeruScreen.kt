@@ -1,0 +1,152 @@
+package pe.todoenuno.peru
+
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import org.json.JSONObject
+import java.net.HttpURLConnection
+import java.net.URL
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
+
+data class QuakeReport(
+    val magnitude:Double?,
+    val depthKm:Double?,
+    val date:String,
+    val time:String,
+    val reference:String,
+    val latitude:Double?,
+    val longitude:Double?,
+)
+
+object IgpService {
+    const val PAGE="https://ultimosismo.igp.gob.pe/productos/reportes-sismicos"
+    // Fuente geográfica pública del IGP: servicio ArcGIS UltimoSismo, capa 0.
+    const val ENDPOINT="https://ide.igp.gob.pe/arcgis/rest/services/monitoreocensis/UltimoSismo/MapServer/0/query?where=1%3D1&outFields=%2A&returnGeometry=false&f=json"
+
+    fun decode(json:String):List<QuakeReport> {
+        val root=JSONObject(json)
+        if(root.has("error"))error("El servicio del IGP devolvió un error.")
+        val array=root.optJSONArray("features")?:return emptyList()
+        return (0 until array.length()).mapNotNull {idx->
+            val attrs=array.optJSONObject(idx)?.optJSONObject("attributes")?:return@mapNotNull null
+            QuakeReport(
+                attrs.optDouble("magnitud").takeIf{it.isFinite()},
+                attrs.optDouble("profundidad").takeIf{it.isFinite()},
+                attrs.optString("fecha_local"),
+                attrs.optString("hora_local"),
+                attrs.optString("referencia","Sin referencia"),
+                attrs.optDouble("latitud").takeIf{it.isFinite()},
+                attrs.optDouble("longitud").takeIf{it.isFinite()}
+            )
+        }.take(30)
+    }
+    fun fetch():List<QuakeReport> {
+        val conn=(URL(ENDPOINT).openConnection() as HttpURLConnection).apply {
+            connectTimeout=9000
+            readTimeout=9000
+            requestMethod="GET"
+            setRequestProperty("Accept","application/json")
+        }
+        return try {
+            require(conn.responseCode==200){"Servidor IGP no disponible."}
+            val raw=conn.inputStream.bufferedReader(Charsets.UTF_8).use{it.readText()}
+            require(raw.length<=200000){"Respuesta demasiado grande."}
+            decode(raw)
+        }finally{conn.disconnect()}
+    }
+}
+
+@Composable
+fun EarthquakesPeruScreen() {
+    val context=LocalContext.current
+    val scope=rememberCoroutineScope()
+    val prefs=remember(context){context.getSharedPreferences("igp_last_query",Context.MODE_PRIVATE)}
+    var reports by remember{mutableStateOf<List<QuakeReport>>(emptyList())}
+    var status by remember{mutableStateOf("")}
+    var updated by remember{mutableStateOf(prefs.getLong("updated",0L))}
+    var loading by remember{mutableStateOf(false)}
+
+    fun refresh(){
+        if(loading)return
+        loading=true
+        scope.launch{
+            runCatching{withContext(Dispatchers.IO){IgpService.fetch()}}
+                .onSuccess {list->
+                    reports=list
+                    updated=System.currentTimeMillis()
+                    prefs.edit().putLong("updated",updated).apply()
+                    status=if(list.isEmpty())"El servicio no devolvió eventos." else "Consulta completada."
+                }.onFailure{status="No fue posible consultar el IGP. Revisa tu conexión."}
+            loading=false
+        }
+    }
+    LaunchedEffect(Unit){refresh()}
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
+        verticalArrangement=Arrangement.spacedBy(14.dp)){
+        Text("Sismos registrados en Perú",style=MaterialTheme.typography.headlineSmall,
+            fontWeight=FontWeight.Bold)
+        Text("Datos oficiales del Instituto Geofísico del Perú (IGP / CENSIS).",
+            style=MaterialTheme.typography.bodyMedium)
+        Text("No predice terremotos ni sustituye una alerta temprana o avisos de INDECI.",
+            color=MaterialTheme.colorScheme.error,
+            style=MaterialTheme.typography.bodySmall)
+        Button(onClick={refresh()},enabled=!loading) {
+            Text(if(loading)"Consultando…" else "Actualizar desde IGP")
+        }
+        if(status.isNotBlank())Text(status)
+        if(updated>0L)Text(
+            "Última consulta: ${SimpleDateFormat("dd/MM/yyyy HH:mm",Locale("es","PE")).format(Date(updated))}",
+            color=MaterialTheme.colorScheme.onSurfaceVariant,
+            style=MaterialTheme.typography.bodySmall)
+        if(reports.isEmpty() && !loading)Text("Pulsa actualizar para consultar el evento disponible.")
+        reports.forEach {event->
+            Card(Modifier.fillMaxWidth()){
+                Column(Modifier.padding(15.dp),verticalArrangement=Arrangement.spacedBy(4.dp)){
+                    Text("Magnitud: ${event.magnitude ?: "N/D"}",
+                        style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.Bold)
+                    Text(event.reference)
+                    Text("Fecha: ${event.date} ${event.time} (hora reportada por IGP)")
+                    Text("Profundidad: ${event.depthKm?.let{"$it km"} ?: "N/D"}")
+                    if(event.latitude!=null && event.longitude!=null)
+                        Text("Lat. ${event.latitude} · Lon. ${event.longitude}")
+                }
+            }
+        }
+        Button(onClick={
+            context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(IgpService.PAGE)))
+        },modifier=Modifier.fillMaxWidth()) {
+            Text("Ver reportes y antecedentes en portal oficial")
+        }
+        Text("El servicio geográfico muestra el último evento publicado, no una base histórica completa. Para otros reportes, abre la web oficial. La app no crea ni modifica magnitudes.",
+            style=MaterialTheme.typography.bodySmall,
+            color=MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+}
