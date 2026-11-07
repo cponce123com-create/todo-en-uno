@@ -32,7 +32,7 @@ object MorseCodec {
         "..-","...-",".--","-..-","-.--","--..",
         "-----",".----","..---","...--","....-",".....","-....","--...","---..","----."
     )
-    private val enc = chars.zip(morse).toMap()
+    private val enc = chars.toList().zip(morse).toMap()
     private val dec = morse.zip(chars.toList()).toMap()
     fun encode(input: String): String = input.uppercase(Locale.ROOT).split(" ").joinToString(" / ") { word ->
         word.mapNotNull { enc[it] }.joinToString(" ")
