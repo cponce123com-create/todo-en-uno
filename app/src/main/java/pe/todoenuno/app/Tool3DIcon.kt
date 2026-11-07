@@ -13,8 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.nativeCanvas
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
 import pe.todoenuno.catalog.ToolDefinition
 
@@ -33,7 +32,7 @@ fun Tool3DIcon(tool: ToolDefinition) {
         0xFF73B9A1.toInt() to 0xFF316D66.toInt()
     )
     val (light, dark) = swatches[tool.id.sumOf { it.code } % swatches.size]
-    Canvas(Modifier.size(64.dp).semantics { contentDescription = tool.title }) {
+    Canvas(Modifier.size(64.dp).clearAndSetSemantics {}) {
         val c=drawContext.canvas.nativeCanvas
         val saves=c.save()
         c.scale(size.width/100f,size.height/100f)

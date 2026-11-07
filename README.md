@@ -2,6 +2,16 @@
 
 Aplicación Android nativa y modular en **Kotlin + Jetpack Compose + Material 3**, diseñada en español.
 
+## Arquitectura: sprint 0.5.0 en PR
+- Navigation Compose con rutas tipadas (Kotlin Serialization) y Back Stack real.
+- Deep links locales: `todoenuno://tool/flashlight` o `todoenuno://tool/calculator`.
+- Pantalla de información como destino secundario (Herramienta → Información → Herramienta).
+- `HomeViewModel` con `SavedStateHandle` para búsqueda y filtros; favoritos en DataStore.
+- `gradle/libs.versions.toml` centraliza versiones de los módulos y plugins.
+- Wrapper oficial de Gradle 8.13: `./gradlew` o `gradlew.bat`.
+- CI ejecuta pruebas de todos los módulos Android, tests JVM, Lint y APK.
+- Los gráficos 3D son decorativos para lectores de pantalla; las tarjetas y estrellas tienen etiquetas legibles.
+
 ## Versión 0.4.0
 
 **33 herramientas disponibles** en el catálogo y organizadas por categorías, con búsqueda, favoritos persistentes y portada de iconos vectoriales 3D en cuadrícula:
