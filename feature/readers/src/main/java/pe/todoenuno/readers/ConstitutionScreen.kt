@@ -53,11 +53,11 @@ fun ConstitutionScreen() {
     val file=remember(context){File(context.filesDir,"legal/constitucion-peru.pdf")}
     val epubFile=remember(context){File(context.filesDir,"legal/constitucion-peru.epub")}
     var epubBook by remember { mutableStateOf<EpubBook?>(null) }
-    var epubChapter by remember { mutableIntStateOf(0) }
-    var epubFont by remember { mutableStateOf(18f) }
-    var epubSearch by remember { mutableStateOf("") }
-    var epubMode by remember { mutableStateOf(false) }
     val prefs=remember(context){context.getSharedPreferences("constitution_reader",0)}
+    var epubChapter by remember { mutableIntStateOf(prefs.getInt("epubChapter",0)) }
+    var epubFont by remember { mutableStateOf(prefs.getFloat("epubFont",18f).coerceIn(14f,28f)) }
+    var epubSearch by remember { mutableStateOf("") }
+    var epubMode by remember { mutableStateOf(prefs.getBoolean("epubMode",false)) }
     var page by remember{mutableIntStateOf(prefs.getInt("page",0))}
     var pages by remember{mutableIntStateOf(0)}
     var image by remember{mutableStateOf<Bitmap?>(null)}
@@ -70,6 +70,7 @@ fun ConstitutionScreen() {
         if(epubFile.exists()) epubBook=runCatching {
             withContext(Dispatchers.IO){SimpleEpubReader.parse(epubFile)}
         }.getOrNull()
+        epubBook?.let { epubChapter=epubChapter.coerceIn(0,it.chapters.lastIndex) }
     }
     val epubPicker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()){uri->
         if(uri!=null) {
@@ -160,8 +161,8 @@ fun ConstitutionScreen() {
             }
         }
     }
-    LaunchedEffect(page,reloaded,documentLoaded){
-        if(!documentLoaded)return@LaunchedEffect
+    LaunchedEffect(page,reloaded,documentLoaded,epubMode){
+        if(!documentLoaded || epubMode)return@LaunchedEffect
         val result=runCatching {
             withContext(Dispatchers.IO){
                 ParcelFileDescriptor.open(file,ParcelFileDescriptor.MODE_READ_ONLY).use{fd->
@@ -169,7 +170,7 @@ fun ConstitutionScreen() {
                         val index=page.coerceIn(0,renderer.pageCount-1)
                         val pageCount=renderer.pageCount
                         renderer.openPage(index).use{pdfPage->
-                            val scale=(1250f/pdfPage.width).coerceIn(1f,2.5f)
+                            val scale=minOf(1250f/pdfPage.width,1800f/pdfPage.height,2.5f).coerceAtMost(2.5f).coerceAtLeast(0.1f)
                             val bitmap=Bitmap.createBitmap(
                                 (pdfPage.width*scale).toInt(),
                                 (pdfPage.height*scale).toInt(),
@@ -189,6 +190,11 @@ fun ConstitutionScreen() {
             // No reciclarlo aquí: el GC lo libera cuando deje de estar referenciado.
             image=it.second
         }.onFailure{error="No se pudo mostrar la página del PDF."}
+    }
+    LaunchedEffect(epubChapter,epubFont,epubMode) {
+        prefs.edit().putInt("epubChapter",epubChapter)
+            .putFloat("epubFont",epubFont)
+            .putBoolean("epubMode",epubMode).apply()
     }
     fun setPage(index:Int){
         page=index.coerceIn(0,(pages-1).coerceAtLeast(0))
