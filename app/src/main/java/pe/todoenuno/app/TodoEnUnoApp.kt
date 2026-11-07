@@ -30,6 +30,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -119,7 +120,22 @@ fun TodoEnUnoApp() {
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
             composable<HomeRoute> {
-                CatalogScreen(CatalogMode.HOME, model) { nav.navigate(ToolRoute(it)) }
+                HomeDashboard(
+                    model=model,
+                    onOpen={nav.navigate(ToolRoute(it))},
+                    onAll={nav.navigate(AllToolsRoute)},
+                    onCategories={nav.navigate(CategoriesRoute)}
+                )
+            }
+            composable<CategoriesRoute> {
+                CategoryExploreScreen(
+                    model=model,
+                    onBack={nav.popBackStack()},
+                    onSelect={ category ->
+                        model.onCategorySelected(category.name)
+                        nav.navigate(AllToolsRoute)
+                    }
+                )
             }
             composable<AllToolsRoute> {
                 CatalogScreen(CatalogMode.ALL, model) { nav.navigate(ToolRoute(it)) }
@@ -158,6 +174,7 @@ private fun CatalogScreen(mode: CatalogMode, model: HomeViewModel, open: (String
     val query by model.query.collectAsState()
     val category by model.category.collectAsState()
     val tools = ToolFilters.visible(ToolCatalog.tools, mode, query, category, favorites)
+    var gridMode by androidx.compose.runtime.saveable.rememberSaveable { androidx.compose.runtime.mutableStateOf(true) }
 
     LazyColumn(
         modifier = Modifier.fillMaxSize(),
@@ -188,6 +205,18 @@ private fun CatalogScreen(mode: CatalogMode, model: HomeViewModel, open: (String
             )
         }
         if (mode == CatalogMode.ALL) item {
+            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(12.dp)){
+                androidx.compose.material3.FilterChip(
+                    selected=gridMode,onClick={gridMode=true},
+                    label={Text("▦ Cuadrícula")}
+                )
+                androidx.compose.material3.FilterChip(
+                    selected=!gridMode,onClick={gridMode=false},
+                    label={Text("☷ Lista")}
+                )
+            }
+        }
+        if (mode == CatalogMode.ALL) item {
             Row(
                 modifier = Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -214,7 +243,7 @@ private fun CatalogScreen(mode: CatalogMode, model: HomeViewModel, open: (String
                 modifier = Modifier.padding(vertical = 28.dp)
             )
         }
-        if (mode == CatalogMode.ALL) {
+        if (mode == CatalogMode.ALL && !gridMode) {
             items(tools, key = { it.id }) { tool ->
                 ToolCatalogCard(tool, tool.id in favorites, { open(tool.id) }) {
                     model.toggleFavorite(tool.id)
@@ -407,7 +436,7 @@ private fun FavoriteButton(tool: ToolDefinition, favorite: Boolean, toggle: () -
 private fun SettingsPanel() {
     Column(Modifier.fillMaxSize().padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Ajustes", style = MaterialTheme.typography.headlineMedium, fontWeight = FontWeight.Bold)
-        Text("Todo en Uno · Versión 0.6.0", style = MaterialTheme.typography.titleMedium)
+        Text("Todo en Uno · Versión 0.7.0", style = MaterialTheme.typography.titleMedium)
         Text("Tema claro y oscuro: sigue la configuración del dispositivo.")
         Text("Tus favoritos se guardan solo en este teléfono.")
         Text("La mayoría de herramientas funciona sin conexión. Las divisas requieren Internet para actualizarse.")

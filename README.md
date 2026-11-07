@@ -1,5 +1,18 @@
 # Todo en Uno · Android
 
+## Versión 0.7.0 — Rediseño y expansión educativa
+
+- Inicio con diseño premium, accesos rápidos 3D personalizables y categorías.
+- Catálogo en cuadrícula o lista, manteniendo búsqueda, favoritos y navegación tipada.
+- Calculadora científica avanzada con motor de expresiones, trigonometría, DEG/RAD e historial local.
+- Tabla periódica offline con 118 elementos, 12 fórmulas de física con calculadora y triángulos notables.
+- Nivel virtual sobre CameraX con retícula de alineación, regla cm/mm calibrable y persistente.
+- Linterna Normal/SOS/Estrobo/Vela, con advertencias de fotosensibilidad.
+- Generador de etiquetas en A4 con QR y exportación PDF mediante selector Android.
+- Nuevos módulos `:feature:education-tools` y `:feature:document-tools`.
+
+**Estado:** versión 0.7.0 en PR #9 hasta superar pruebas, Lint y APK. El mockup de referencia es inspiración visual; la implementación utiliza iconografía vectorial en lugar de copiar la imagen completa.
+
 Aplicación Android nativa y modular en **Kotlin + Jetpack Compose + Material 3**, diseñada en español.
 
 ## Arquitectura: versión 0.6.0

@@ -6,6 +6,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+concurrency:
+  group: android-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 permissions:
   contents: read
 
@@ -63,7 +67,7 @@ jobs:
     name: Pruebas de navegación y favoritos en emulador API 35
     needs: debug-apk
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 45
     steps:
       - name: Descargar código
         uses: actions/checkout@v4
@@ -92,8 +96,23 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim
-          script: ./gradlew :app:connectedDebugAndroidTest --no-daemon --stacktrace
+          emulator-options: -no-window -gpu swiftshader_indirect -no-snapshot -noaudio -no-boot-anim -memory 3072 -cores 2
+          script: |
+            adb wait-for-device
+            ready=0
+            for attempt in $(seq 1 20); do
+              if adb shell getprop sys.boot_completed | grep -q "1" && adb shell cmd package list packages >/dev/null 2>&1; then
+                ready=1
+                break
+              fi
+              echo "Esperando PackageManager del emulador: intento $attempt"
+              sleep 4
+            done
+            if [ "$ready" -ne 1 ]; then
+              echo "El sistema Android del emulador no terminó de iniciarse"
+              exit 1
+            fi
+            ./gradlew :app:connectedDebugAndroidTest --no-daemon --stacktrace
       - name: Informes instrumentados
         if: always()
         uses: actions/upload-artifact@v4

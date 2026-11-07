@@ -267,6 +267,39 @@ private fun renderGlyph(c:NativeCanvas,id:String){
             triangle(c,60f,61f,78f,61f,69f,78f,gold)
             line(c,37f,47f,61f,58f,ivory,4f)
         }
+        "periodic" -> {
+            rr(c,25f,22f,72f,72f,8f,ivory)
+            text(c,"Fe",49f,59f,29f,navy)
+            text(c,"26",34f,34f,11f,coral)
+        }
+        "physics" -> {
+            circle(c,49f,48f,7f,gold)
+            c.drawOval(RectF(22f,35f,76f,62f),brush(ivory,4f))
+            val sav=c.save();c.rotate(60f,49f,48f)
+            c.drawOval(RectF(22f,35f,76f,62f),brush(coral,4f))
+            c.restoreToCount(sav)
+            val sav2=c.save();c.rotate(-60f,49f,48f)
+            c.drawOval(RectF(22f,35f,76f,62f),brush(mint,4f))
+            c.restoreToCount(sav2)
+        }
+        "triangles" -> {
+            triangle(c,25f,72f,25f,26f,75f,72f,ivory)
+            triangle(c,33f,63f,33f,42f,56f,63f,coral)
+            line(c,33f,63f,43f,63f,navy,3f)
+        }
+        "labels" -> {
+            rr(c,26f,22f,73f,73f,7f,ivory)
+            rr(c,33f,32f,66f,51f,3f,navy)
+            text(c,"PDF",49f,46f,13f,ivory)
+            text(c,"QR",49f,65f,13f,coral)
+        }
+        "laserlevel" -> {
+            rr(c,24f,30f,75f,69f,9f,navy)
+            rr(c,28f,34f,71f,65f,6f,ivory)
+            line(c,27f,50f,72f,50f,mint,4f)
+            line(c,50f,28f,50f,72f,mint,3f)
+            circle(c,50f,50f,5f,coral)
+        }
         else -> text(c,id.take(2).uppercase(),49f,58f,25f)
     }
 }
