@@ -7,6 +7,8 @@ import pe.todoenuno.personal.QuickNotesScreen
 import pe.todoenuno.personal.PainterColorsScreen
 import pe.todoenuno.personal.IdVaultScreen
 import pe.todoenuno.peru.EarthquakesPeruScreen
+import pe.todoenuno.peru.WeatherScreen
+import pe.todoenuno.peru.ParanormalScreen
 import pe.todoenuno.readers.BibleScreen
 import pe.todoenuno.readers.RecipeEpubScreen
 import pe.todoenuno.readers.ConstitutionScreen
@@ -27,7 +29,7 @@ import pe.todoenuno.sensor.SensorToolsScreen
 import pe.todoenuno.utilities.ToolScreen
 
 /** Registrar por dominio evita acoplar las implementaciones del hardware al catálogo. */
-enum class ToolDomain { MATH, SENSOR, LOCATION, UTILITIES, AUDIO, RECORDER, FINANCE, CAMERA, EDUCATION, DOCUMENTS, GAMES, PERSONAL, PERU, READERS }
+enum class ToolDomain { MATH, SENSOR, LOCATION, UTILITIES, AUDIO, RECORDER, FINANCE, CAMERA, EDUCATION, DOCUMENTS, GAMES, PERSONAL, PERU, READERS, PARANORMAL }
 
 object ToolRouting {
     private val math = setOf("calculator", "converter", "finance", "age", "bmi")
@@ -41,7 +43,7 @@ object ToolRouting {
     private val educational = setOf("periodic", "physics", "triangles")
     private val games = setOf("snake","blocks","shooter")
     private val personal = setOf("notes","idvault","paintmix")
-    private val peruvian = setOf("earthquakes","constitution")
+    private val peruvian = setOf("earthquakes","constitution","weather")
     private val reading = setOf("bible","recipes")
     fun domain(id: String): ToolDomain? = when (id) {
         in math -> ToolDomain.MATH
@@ -58,6 +60,7 @@ object ToolRouting {
         in personal -> ToolDomain.PERSONAL
         in peruvian -> ToolDomain.PERU
         in reading -> ToolDomain.READERS
+        "paranormal" -> ToolDomain.PARANORMAL
         else -> null
     }
 }
@@ -84,7 +87,12 @@ fun AppToolRenderer(id: String) {
             "notes" -> QuickNotesScreen()
             else -> PainterColorsScreen()
         }
-        ToolDomain.PERU -> if(id=="earthquakes")EarthquakesPeruScreen() else ConstitutionScreen()
+        ToolDomain.PERU -> when(id) {
+            "earthquakes" -> EarthquakesPeruScreen()
+            "weather" -> WeatherScreen()
+            else -> ConstitutionScreen()
+        }
+        ToolDomain.PARANORMAL -> ParanormalScreen()
         ToolDomain.READERS -> if(id=="bible")BibleScreen() else RecipeEpubScreen()
         ToolDomain.EDUCATION -> when(id){
             "periodic"->PeriodicTableScreen()
