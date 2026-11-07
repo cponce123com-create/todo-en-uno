@@ -20,11 +20,16 @@ private fun weatherJson(url:String):JSONObject {
     }
     return try {
         require(conn.responseCode==200){"Servicio meteorológico no disponible"}
-        val raw=conn.inputStream.bufferedReader().use { it.readText().take(100000) }
+        val raw=conn.inputStream.bufferedReader().use { reader ->
+            val text=reader.readText()
+            require(text.length<=100000){"Respuesta demasiado grande"}
+            text
+        }
         JSONObject(raw)
     } finally { conn.disconnect() }
 }
 private fun lookupWeather(city:String):WeatherReport {
+    require(city.length in 2..80){"Escribe una ciudad válida."}
     val geo=weatherJson("https://geocoding-api.open-meteo.com/v1/search?name="+URLEncoder.encode(city,"UTF-8")+"&count=1&language=es&format=json")
     val location=geo.optJSONArray("results")?.optJSONObject(0) ?: error("No se encontró la ciudad.")
     val lat=location.getDouble("latitude");val lon=location.getDouble("longitude")
@@ -49,7 +54,7 @@ fun WeatherScreen() {
         Text("Consulta condiciones meteorológicas actuales por ciudad. Fuente: Open-Meteo. No requiere permiso de ubicación.")
         OutlinedTextField(value=city,onValueChange={city=it.take(80)},label={Text("Ciudad")},singleLine=true,modifier=Modifier.fillMaxWidth())
         Button(enabled=!busy && city.isNotBlank(),onClick={
-            busy=true;error=""
+            busy=true;error="";report=null
             scope.launch {
                 runCatching { withContext(Dispatchers.IO){lookupWeather(city.trim())} }
                     .onSuccess { report=it }.onFailure { error=it.message ?: "Error de conexión" }
