@@ -1,5 +1,7 @@
 package pe.todoenuno.utilities
 
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -12,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -52,6 +55,24 @@ object CalculatorEngine {
             }
             key == "±" -> old.copy(display = if (current == 0.0) "0" else format(-current))
             key == "%" -> old.copy(display = format(current / 100.0))
+            key == "π" -> old.copy(display = format(Math.PI), newOperand = false)
+            key in setOf("√","x²","1/x","sin","cos","tan","log","ln") -> {
+                val v = when(key) {
+                    "√" -> if(current<0) return error() else kotlin.math.sqrt(current)
+                    "x²" -> current*current
+                    "1/x" -> if(current==0.0) return error() else 1.0/current
+                    "sin" -> kotlin.math.sin(Math.toRadians(current))
+                    "cos" -> kotlin.math.cos(Math.toRadians(current))
+                    "tan" -> {
+                        val radians=Math.toRadians(current)
+                        if(kotlin.math.abs(kotlin.math.cos(radians))<1e-12) return error()
+                        kotlin.math.tan(radians)
+                    }
+                    "log" -> if(current<=0) return error() else kotlin.math.log10(current)
+                    else -> if(current<=0) return error() else kotlin.math.ln(current)
+                }
+                if(v.isFinite()) old.copy(display=format(v),newOperand=true) else error()
+            }
             key in operators -> {
                 if (old.memory != null && old.operator != null && !old.newOperand) {
                     val result = calculate(old.memory, current, old.operator) ?: return error()
@@ -98,15 +119,17 @@ private val keypad = listOf(
 @Composable
 fun CalculatorScreen() {
     var state by remember { mutableStateOf(CalcState()) }
-    CalculatorBody(state = state, onKey = { state = CalculatorEngine.press(state, it) })
+    var scientific by remember { mutableStateOf(false) }
+    CalculatorBody(state = state, scientific=scientific, onToggle={scientific=!scientific}, onKey = { state = CalculatorEngine.press(state, it) })
 }
 
 @Composable
-private fun CalculatorBody(state: CalcState, onKey: (String) -> Unit) {
+private fun CalculatorBody(state: CalcState,scientific:Boolean,onToggle:()->Unit,onKey: (String) -> Unit) {
     Column(
-        modifier = Modifier.fillMaxSize().padding(18.dp),
+        modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(18.dp),
         verticalArrangement = Arrangement.Bottom
     ) {
+        TextButton(onClick=onToggle) { Text(if(scientific) "Modo estándar" else "Modo científico") }
         Text(
             text = state.display,
             textAlign = TextAlign.End,
@@ -116,6 +139,21 @@ private fun CalculatorBody(state: CalcState, onKey: (String) -> Unit) {
             maxLines = 2,
             modifier = Modifier.fillMaxWidth().padding(bottom = 28.dp)
         )
+        if(scientific) {
+            listOf(listOf("sin","cos","tan","π"),listOf("√","x²","log","ln"),listOf("1/x")).forEach { keys ->
+                Row(Modifier.fillMaxWidth().padding(bottom=8.dp),horizontalArrangement=Arrangement.spacedBy(8.dp)){
+                    keys.forEach { key ->
+                        Button(onClick={onKey(key)},modifier=Modifier.weight(1f).height(46.dp),
+                            shape=RoundedCornerShape(13.dp),
+                            colors=ButtonDefaults.buttonColors(containerColor=MaterialTheme.colorScheme.tertiaryContainer,
+                                contentColor=MaterialTheme.colorScheme.onTertiaryContainer),
+                            contentPadding=androidx.compose.foundation.layout.PaddingValues(0.dp)){
+                            Text(key,fontSize=15.sp)
+                        }
+                    }
+                }
+            }
+        }
         keypad.forEach { keys ->
             Row(
                 modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
@@ -125,13 +163,13 @@ private fun CalculatorBody(state: CalcState, onKey: (String) -> Unit) {
                     val isOperator = key in setOf("+", "−", "÷", "×", "=")
                     Button(
                         onClick = { onKey(key) },
-                        modifier = Modifier.weight(if (keys.size == 3 && key == "0") 2f else 1f).height(69.dp),
+                        modifier = Modifier.weight(if (keys.size == 3 && key == "0") 2f else 1f).height(if(scientific) 51.dp else 69.dp),
                         shape = RoundedCornerShape(20.dp),
                         colors = if (isOperator) ButtonDefaults.buttonColors()
                         else ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondaryContainer, contentColor = MaterialTheme.colorScheme.onSecondaryContainer),
                         contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
                     ) {
-                        Text(key, fontSize = 24.sp)
+                        Text(key, fontSize = if(scientific) 19.sp else 24.sp)
                     }
                 }
             }

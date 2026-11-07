@@ -1,42 +1,47 @@
 # Todo en Uno · Android
 
-Centro de herramientas Android, desarrollado con Kotlin y Jetpack Compose. Aplicación en español, orientada a funcionar sin conexión.
+Aplicación Android nativa y modular en **Kotlin + Jetpack Compose + Material 3**, diseñada en español.
 
-## Versión 0.2.0
+## Versión 0.3.0
 
-- Inicio con catálogo, búsqueda y favoritos persistentes.
-- Calculadora, linterna, conversor de unidades, cronómetro, temporizador y reloj mundial.
-- Reproductor de audio local (Media3 ExoPlayer + MediaSessionService) con control desde pantalla bloqueada y notificación.
-- Brújula magnética, nivel de burbuja, generador QR y contraseñas seguras.
-- Iconografía de estilo 3D ligero: relieve, sombras, brillos y colores por herramienta.
-- Interfaz Material 3 con modo claro/oscuro automático.
-- Arquitectura modular: `app`, `core:catalog`, `feature:utilities`.
-- APK de depuración generado por GitHub Actions, sin instalar Android Studio.
+**29 herramientas disponibles** en el catálogo y organizadas por categorías, con búsqueda, favoritos persistentes y portada de iconos vectoriales 3D en cuadrícula:
 
-## Compilación
+- Iluminación y sensores: linterna, brújula magnética, nivel de burbuja, regla calibrable, GPS y sonómetro **relativo** (dBFS).
+- Cálculos: calculadora estándar/científica, conversores de 8 categorías, propinas, préstamos, edad e IMC orientativo.
+- Tiempo: reloj mundial, cronómetro, temporizador, Pomodoro y metrónomo.
+- Multimedia y cámara: reproductor de audio **en segundo plano** (Media3), grabadora de voz **en primer plano**, espejo, lupa y escáner QR sin conexión.
+- Productividad: crear QR, generador de contraseñas, procesamiento de texto, colores RGB/HEX, Morse.
+- Información y red: datos del dispositivo, estado de red y DNS, tipo de cambio multimoneda con tasas fechadas y caché offline.
 
-Abre **Actions → Android CI → último flujo correcto → Artifacts → todo-en-uno-debug-apk**.
+## Descargar APK
 
-También se puede compilar localmente con Gradle 8.13 y JDK 17:
+En GitHub, abre **Actions → Android CI → última ejecución con marca verde → Artifacts → todo-en-uno-debug-apk**.
 
-```bash
-gradle :app:assembleDebug
-```
+El artefacto contiene `app-debug.apk`. Requiere Android 8.0 (API 26) o superior.
 
-> Nota: aún no se incluye el Gradle Wrapper; CI instala una versión fija de Gradle. No se ha verificado la aplicación en dispositivos físicos.
+## Desarrollo
 
-## Estructura
+- `app`: navegación, inicio, temas, favoritos con DataStore.
+- `core:catalog`: metadatos puros de herramientas.
+- `feature:utilities`: utilidades pequeñas y sensores.
+- `feature:audio`: Media3 MediaSessionService para reproducción de audio local en segundo plano.
+- `feature:recorder`: captura de micrófono, exportación SAF y dBFS.
+- `feature:finance`: consulta HTTPS de Frankfurter y caché fechada.
+- `feature:camera`: cámara con CameraX y reconocimiento QR ZXing.
+- `.github/workflows/android.yml`: pruebas unitarias y APK debug.
 
-- `app`: interfaz principal, navegación y favoritos guardados con DataStore.
-- `core:catalog`: definiciones y registro de herramientas, sin dependencia Android.
-- `feature:utilities`: pantallas y lógica de las primeras herramientas.
+Para compilar localmente se necesita JDK 17, Android SDK 36 y Gradle 8.13. El Gradle Wrapper aún no se ha añadido.
 
-La navegación se centraliza en la app y las herramientas exponen interfaces declarativas. Las funciones más complejas obtendrán módulos propios conforme crezcan.
+## Privacidad y límites
 
-## Privacidad
+Los permisos de cámara, micrófono y ubicación se solicitan cuando entras en la herramienta correspondiente. La grabadora guarda inicialmente archivos en almacenamiento privado y permite exportarlos de forma explícita. Solo la consulta de divisas requiere Internet; el reproductor utiliza archivos seleccionados por el usuario.
 
-Sin inicio de sesión, anuncios ni analíticas. La reproducción local no requiere permiso general de almacenamiento: el usuario selecciona sus archivos con el selector del sistema. El servicio de audio utiliza únicamente los permisos de primer plano exigidos por Android para reproducción multimedia; no pide micrófono ni acceso a la ubicación. El uso de sensores depende del equipo.
+El sonómetro indica **dBFS relativo, no dB SPL calibrados**. El GPS y la regla dependen de la precisión de sensores y pantalla. La cotización de divisas es una tasa media de referencia, no el precio de compra/venta ni la cotización oficial BCRP. IMC y cálculos financieros son informativos.
 
-## Próximos pasos
+La grabadora, el temporizador y el Pomodoro no mantienen su propia captura o cuenta atrás como servicio de segundo plano. La **reproducción de audio** sí utiliza un servicio Media3 compatible con pantalla bloqueada.
 
-Ver [ROADMAP](docs/ROADMAP.md).
+## Estado de pruebas
+
+El flujo CI ejecuta pruebas JVM y compila APK debug. Es necesario validar cámara, micrófono, segundo plano, GPS y diversos tamaños de pantalla en equipos Android reales.
+
+Consulta [ROADMAP](docs/ROADMAP.md) para las funciones pendientes y el plan de pruebas.

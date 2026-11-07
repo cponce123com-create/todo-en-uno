@@ -6,7 +6,10 @@ enum class ToolCategory(val title: String) {
     TIEMPO("Tiempo"),
     SENSORES("Sensores"),
     PRODUCTIVIDAD("Productividad"),
-    MULTIMEDIA("Multimedia")
+    MULTIMEDIA("Multimedia"),
+    UBICACION("Ubicación"),
+    FINANZAS("Finanzas"),
+    SISTEMA("Sistema")
 }
 
 data class ToolDefinition(
@@ -30,6 +33,24 @@ object ToolCatalog {
         ToolDefinition("level", "Nivel", "Inclinación de superficies", "📐", ToolCategory.SENSORES),
         ToolDefinition("qr", "Crear código QR", "Genera códigos sin conexión", "🔳", ToolCategory.PRODUCTIVIDAD),
         ToolDefinition("password", "Contraseñas", "Crea claves aleatorias seguras", "🔐", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("recorder", "Grabadora", "Graba y exporta audios locales", "🎙️", ToolCategory.MULTIMEDIA),
+        ToolDefinition("currency", "Tipo de cambio", "Divisas con cotizaciones fechadas", "💱", ToolCategory.FINANZAS),
+        ToolDefinition("gps", "GPS", "Coordenadas y velocidad", "📍", ToolCategory.UBICACION),
+        ToolDefinition("ruler", "Regla", "Regla física calibrable en pantalla", "📏", ToolCategory.SENSORES),
+        ToolDefinition("pomodoro", "Pomodoro", "Enfoque y descansos", "🍅", ToolCategory.TIEMPO),
+        ToolDefinition("text", "Texto", "Contar, convertir y copiar", "📝", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("color", "Colores", "Paleta RGB y HEX", "🎨", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("finance", "Cálculos financieros", "Propinas, cuentas y préstamos", "💰", ToolCategory.FINANZAS),
+        ToolDefinition("morse", "Código Morse", "Convierte textos y señales", "📡", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("device", "Información del equipo", "Batería, RAM, versión Android", "📱", ToolCategory.SISTEMA),
+        ToolDefinition("mirror", "Espejo", "Cámara frontal", "🪞", ToolCategory.MULTIMEDIA),
+        ToolDefinition("magnifier", "Lupa", "Ampliación con cámara trasera", "🔎", ToolCategory.MULTIMEDIA),
+        ToolDefinition("qrscan", "Escanear QR", "Lee códigos QR sin conexión", "📷", ToolCategory.PRODUCTIVIDAD),
+        ToolDefinition("sound", "Sonómetro relativo", "Señal del micrófono en dBFS", "🔊", ToolCategory.SENSORES),
+        ToolDefinition("metronome", "Metrónomo", "Pulsos de audio ajustables", "🎼", ToolCategory.MULTIMEDIA),
+        ToolDefinition("age", "Calcular edad", "Años, meses y días", "📅", ToolCategory.CALCULO),
+        ToolDefinition("bmi", "IMC", "Índice de masa corporal orientativo", "⚖️", ToolCategory.CALCULO),
+        ToolDefinition("network", "Información de red", "Conexión y DNS", "📶", ToolCategory.SISTEMA),
     )
 
     fun find(id: String): ToolDefinition? = tools.firstOrNull { it.id == id }

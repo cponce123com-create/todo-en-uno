@@ -37,7 +37,7 @@ jobs:
         with:
           gradle-version: '8.13'
       - name: Ejecutar pruebas y compilar
-        run: gradle :feature:utilities:testDebugUnitTest :app:assembleDebug --no-daemon --stacktrace
+        run: gradle :feature:utilities:testDebugUnitTest :feature:recorder:testDebugUnitTest :app:assembleDebug --no-daemon --stacktrace
       - name: Publicar APK
         if: success()
         uses: actions/upload-artifact@v4

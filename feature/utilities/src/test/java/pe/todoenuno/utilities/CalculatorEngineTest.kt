@@ -20,6 +20,14 @@ class CalculatorEngineTest {
         assertEquals("20", keys("2", "+", "3", "×", "4", "=").display)
     }
 
+    @Test fun calculadoraCientifica() {
+        assertEquals("3.141592653589793",keys("π").display)
+        assertEquals("4",keys("9","√","x²","AC","2","x²").display)
+        assertEquals("0",keys("0","sin").display)
+        assertTrue(keys("0","1/x").error)
+        assertTrue(keys("9","±","√").error)
+    }
+
     @Test fun porcentaje() {
         assertEquals("0.25", keys("2", "5", "%").display)
     }
