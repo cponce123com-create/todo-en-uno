@@ -1,6 +1,7 @@
 package pe.todoenuno.personal
 
 import android.content.Context
+import android.util.AtomicFile
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -39,27 +40,33 @@ import java.util.UUID
 data class QuickNote(val id:String,val title:String,val text:String,val updated:Long)
 
 class NoteStore(private val context:Context) {
+    companion object { private val lock=Any() }
     private val file get()=File(context.filesDir,"quick_notes.json")
-    fun load():List<QuickNote> = runCatching {
-        if(!file.exists())return emptyList()
-        val arr=JSONArray(file.readText())
+    fun load():List<QuickNote> = synchronized(lock) {
+        val atomic=AtomicFile(file)
+        if(!file.exists() && !File(file.path+".bak").exists())return@synchronized emptyList()
+        val arr=JSONArray(atomic.openRead().bufferedReader().use{it.readText()})
         (0 until arr.length()).map{index->
             val x=arr.getJSONObject(index)
             QuickNote(x.getString("id"),x.optString("title"),
                 x.optString("text"),x.optLong("updated"))
         }
-    }.getOrDefault(emptyList())
-    fun save(notes:List<QuickNote>) {
+    }
+    fun save(notes:List<QuickNote>) = synchronized(lock) {
         val arr=JSONArray()
-        notes.take(300).forEach { n->
+        require(notes.size<=300){"Máximo 300 notas. Elimina una antes de crear otra."}
+        notes.forEach { n->
             arr.put(JSONObject().put("id",n.id).put("title",n.title)
                 .put("text",n.text).put("updated",n.updated))
         }
-        val pending=File(file.parentFile,file.name+".tmp")
-        pending.writeText(arr.toString())
-        if(!pending.renameTo(file)) {
-            file.writeText(arr.toString())
-            pending.delete()
+        val atomic=AtomicFile(file)
+        val stream=atomic.startWrite()
+        try {
+            stream.write(arr.toString().toByteArray(Charsets.UTF_8))
+            atomic.finishWrite(stream)
+        } catch(t:Throwable) {
+            atomic.failWrite(stream)
+            throw t
         }
     }
 }
@@ -75,12 +82,30 @@ fun QuickNotesScreen() {
     var body by remember{mutableStateOf("")}
     var filter by remember{mutableStateOf("")}
     var status by remember{mutableStateOf("")}
-    LaunchedEffect(store){ notes=withContext(Dispatchers.IO){store.load()} }
-    fun persist(next:List<QuickNote>) {
-        notes=next
+    var busy by remember{mutableStateOf(true)}
+    LaunchedEffect(store){
+        try {
+            notes=withContext(Dispatchers.IO){store.load()}
+            busy=false
+        } catch(e:Exception) {
+            if(e is kotlinx.coroutines.CancellationException)throw e
+            status="No se pudieron leer las notas. No se sobrescribirán los datos guardados."
+        }
+    }
+    fun persist(next:List<QuickNote>,afterSave:()->Unit={}) {
+        if(busy)return
+        if(next.size>300){status="Máximo 300 notas. Elimina una antes de crear otra.";return}
+        busy=true
         scope.launch{
-            runCatching {withContext(Dispatchers.IO){store.save(next)}}
-                .onFailure {status="No se pudo guardar la nota."}
+            try {
+                withContext(Dispatchers.IO){store.save(next)}
+                notes=next
+                status="Cambios guardados."
+                afterSave()
+            } catch(e:Exception) {
+                if(e is kotlinx.coroutines.CancellationException)throw e
+                status="No se pudo guardar la nota. Tu texto sigue disponible."
+            } finally {busy=false}
         }
     }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -89,22 +114,23 @@ fun QuickNotesScreen() {
         Text("Guardadas en el almacenamiento privado de este teléfono.")
         OutlinedTextField(value=filter,onValueChange={filter=it.take(80)},
             modifier=Modifier.fillMaxWidth(),label={Text("Buscar notas")},singleLine=true)
-        OutlinedTextField(value=title,onValueChange={title=it.take(100)},
+        OutlinedTextField(enabled=!busy,value=title,onValueChange={title=it.take(100)},
             modifier=Modifier.fillMaxWidth(),label={Text("Título")},singleLine=true)
-        OutlinedTextField(value=body,onValueChange={body=it.take(20000)},
+        OutlinedTextField(enabled=!busy,value=body,onValueChange={body=it.take(20000)},
             modifier=Modifier.fillMaxWidth().padding(bottom=6.dp),
             label={Text("Escribe aquí tu nota")},minLines=4,maxLines=12)
         Row(horizontalArrangement=Arrangement.spacedBy(10.dp)) {
-            Button(onClick={
+            Button(enabled=!busy,onClick={
                 if(title.isNotBlank()||body.isNotBlank()) {
                     val id=opened?:UUID.randomUUID().toString()
                     val now=System.currentTimeMillis()
                     persist((notes.filterNot{it.id==id}+QuickNote(id,title,body,now))
-                        .sortedByDescending{it.updated})
-                    opened=null;title="";body="";status="Nota guardada."
+                        .sortedByDescending{it.updated}) {
+                        opened=null;title="";body=""
+                    }
                 }
             }) {Text(if(opened==null)"Guardar nota" else "Actualizar nota")}
-            OutlinedButton(onClick={opened=null;title="";body=""}){Text("Nueva")}
+            OutlinedButton(enabled=!busy,onClick={opened=null;title="";body=""}){Text("Nueva")}
         }
         if(status.isNotBlank())Text(status,color=MaterialTheme.colorScheme.primary)
         Text("Tus notas (${notes.size})",style=MaterialTheme.typography.titleMedium)
@@ -116,12 +142,13 @@ fun QuickNotesScreen() {
                     Text(note.title.ifBlank{"Nota sin título"},fontWeight=FontWeight.Bold)
                     Text(note.text.take(140),style=MaterialTheme.typography.bodySmall)
                     Row(horizontalArrangement=Arrangement.spacedBy(10.dp)) {
-                        TextButton(onClick={opened=note.id;title=note.title;body=note.text}){
+                        TextButton(enabled=!busy,onClick={opened=note.id;title=note.title;body=note.text}){
                             Text("Editar")
                         }
-                        TextButton(onClick={
-                            persist(notes.filterNot{it.id==note.id})
-                            if(opened==note.id){opened=null;title="";body=""}
+                        TextButton(enabled=!busy,onClick={
+                            persist(notes.filterNot{it.id==note.id}) {
+                                if(opened==note.id){opened=null;title="";body=""}
+                            }
                         }){Text("Eliminar")}
                     }
                 }

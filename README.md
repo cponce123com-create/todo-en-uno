@@ -11,7 +11,7 @@
 - Generador de etiquetas en A4 con QR y exportación PDF mediante selector Android.
 - Nuevos módulos `:feature:education-tools` y `:feature:document-tools`.
 
-**Estado:** versión 0.7.0 en PR #9 hasta superar pruebas, Lint y APK. El mockup de referencia es inspiración visual; la implementación utiliza iconografía vectorial en lugar de copiar la imagen completa.
+**Estado:** consulta Android CI para conocer el resultado de pruebas, Lint y APK del commit que vayas a instalar. El mockup de referencia es inspiración visual; la implementación utiliza iconografía vectorial en lugar de copiar la imagen completa.
 
 Aplicación Android nativa y modular en **Kotlin + Jetpack Compose + Material 3**, diseñada en español.
 
@@ -29,7 +29,7 @@ Las herramientas se separaron por dominios en `:feature:math-tools`, `:feature:s
 
 ## Herramientas heredadas de 0.4.0
 
-**33 herramientas disponibles** en el catálogo y organizadas por categorías, con búsqueda, favoritos persistentes y portada de iconos vectoriales 3D en cuadrícula:
+**Herramientas disponibles** en el catálogo y organizadas por categorías, con búsqueda, favoritos persistentes y portada de iconos vectoriales 3D en cuadrícula:
 
 - Iluminación y sensores: linterna, brújula magnética, nivel de burbuja, regla calibrable, GPS y sonómetro **relativo** (dBFS).
 - Cálculos: calculadora estándar/científica, conversores de 8 categorías, propinas, préstamos, edad e IMC orientativo.
@@ -60,7 +60,7 @@ Para compilar localmente necesitas JDK 17 y Android SDK 36; usa el Wrapper inclu
 
 ## Privacidad y límites
 
-Los permisos de cámara, micrófono y ubicación se solicitan cuando entras en la herramienta correspondiente. La grabadora guarda inicialmente archivos en almacenamiento privado y permite exportarlos de forma explícita. Solo la consulta de divisas requiere Internet; el reproductor utiliza archivos seleccionados por el usuario.
+Los permisos de cámara, micrófono y ubicación se solicitan cuando entras en la herramienta correspondiente. La grabadora guarda inicialmente archivos en almacenamiento privado y permite exportarlos de forma explícita. Las consultas de divisas, clima y sismos requieren Internet; el reproductor utiliza archivos seleccionados por el usuario.
 
 El sonómetro indica **dBFS relativo, no dB SPL calibrados**. El GPS y la regla dependen de la precisión de sensores y pantalla. La cotización de divisas es una tasa media de referencia, no el precio de compra/venta ni la cotización oficial BCRP. IMC y cálculos financieros son informativos.
 
@@ -71,3 +71,12 @@ El temporizador dispone de aviso opcional con WorkManager (puede demorarse), mie
 El flujo CI ejecuta pruebas JVM y compila APK debug. Es necesario validar cámara, micrófono, segundo plano, GPS y diversos tamaños de pantalla en equipos Android reales.
 
 Consulta [ROADMAP](docs/ROADMAP.md) para las funciones pendientes y el plan de pruebas.
+
+## Correcciones de integridad y lectores
+
+- Notas: escrituras atómicas y exclusivas, límite visible de 300, confirmación tras guardar y bloqueo de cambios si falla la lectura inicial.
+- Bóveda DNI: resultados de lectura invalidados al bloquear/cambiar lado; destino de importación capturado al elegir la foto.
+- EPUB: los documentos que exceden 65 000 caracteres por sección o 400 secciones se rechazan explícitamente, sin truncar texto.
+- Temporizador: conceder permiso durante una cuenta programa el aviso pendiente.
+- Grabaciones: exportación fuera del hilo de interfaz y preparación asíncrona del reproductor.
+- Sismos: orden cronológico antes de limitar resultados. Se consulta la capa histórica oficial Sismos Reportados del IGP, ordenada por fechaevento descendente, con hasta 30 reportes por consulta y 100 eventos guardados localmente.
