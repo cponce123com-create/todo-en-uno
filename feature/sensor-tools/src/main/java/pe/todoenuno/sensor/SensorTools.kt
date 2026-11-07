@@ -22,7 +22,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
@@ -91,16 +90,17 @@ fun CompassScreen() {
         } else {
             Text("${azimuth.roundToInt()}° · ${cardinal(azimuth)}",
                 style = MaterialTheme.typography.headlineMedium, modifier = Modifier.padding(16.dp))
+            val palette = MaterialTheme.colorScheme
             Canvas(Modifier.size(260.dp)) {
                 val radius = size.minDimension / 2.3f
                 val c = center
-                drawCircle(Color(0xFF155A64), radius)
-                drawCircle(Color(0xFFC8F5E8), radius * .9f)
+                drawCircle(palette.primary, radius)
+                drawCircle(palette.primaryContainer, radius * .9f)
                 val angle = (azimuth.toDouble() * PI / 180.0).toFloat()
                 val dx = kotlin.math.sin(angle) * radius * .75f
                 val dy = -kotlin.math.cos(angle) * radius * .75f
-                drawLine(Color(0xFFF4645A), Offset(c.x - dx, c.y - dy), Offset(c.x + dx, c.y + dy), strokeWidth = 14f)
-                drawCircle(Color(0xFF145E66), radius = 11f)
+                drawLine(palette.error, Offset(c.x - dx, c.y - dy), Offset(c.x + dx, c.y + dy), strokeWidth = 14f)
+                drawCircle(palette.onPrimaryContainer, radius = 11f)
             }
             Text("Norte magnético aproximado. Calibra moviendo el teléfono en forma de ocho.",
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -142,19 +142,20 @@ fun LevelScreen() {
         if (sensor == null) {
             Text("No hay acelerómetro disponible.")
         } else {
+            val palette = MaterialTheme.colorScheme
             Canvas(Modifier.size(265.dp).padding(8.dp)) {
                 val radius = size.minDimension * .42f
-                drawCircle(Color(0xFF155A64), radius)
-                drawCircle(Color(0xFFC8F5E8), radius * .87f)
-                drawCircle(Color(0xFF228E8A), radius * .19f, style = androidx.compose.ui.graphics.drawscope.Stroke(5f))
-                drawLine(Color(0xFF2B8683), Offset(center.x - radius, center.y), Offset(center.x + radius, center.y), 3f)
-                drawLine(Color(0xFF2B8683), Offset(center.x, center.y - radius), Offset(center.x, center.y + radius), 3f)
+                drawCircle(palette.primary, radius)
+                drawCircle(palette.primaryContainer, radius * .87f)
+                drawCircle(palette.tertiary, radius * .19f, style = androidx.compose.ui.graphics.drawscope.Stroke(5f))
+                drawLine(palette.outline, Offset(center.x - radius, center.y), Offset(center.x + radius, center.y), 3f)
+                drawLine(palette.outline, Offset(center.x, center.y - radius), Offset(center.x, center.y + radius), 3f)
                 val bubble = Offset(
                     center.x + (xAngle / 35f).coerceIn(-1f, 1f) * radius * .72f,
                     center.y + (yAngle / 35f).coerceIn(-1f, 1f) * radius * .72f
                 )
-                drawCircle(Color(0xFF0D6B63), radius * .16f, bubble)
-                drawCircle(Color(0xFF90E6B8), radius * .12f, bubble)
+                drawCircle(palette.primary, radius * .16f, bubble)
+                drawCircle(palette.tertiaryContainer, radius * .12f, bubble)
             }
             Text("Eje X: ${xAngle.roundToInt()}° · Eje Y: ${yAngle.roundToInt()}°",
                 style = MaterialTheme.typography.titleLarge, modifier = Modifier.padding(16.dp))

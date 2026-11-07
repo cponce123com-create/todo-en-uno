@@ -18,8 +18,6 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -39,14 +37,15 @@ fun RulerScreen() {
         Slider(value=correction,onValueChange={correction=it},valueRange=0.80f..1.20f)
         Text("Calibra con una regla real o tarjeta de tamaño conocido.",
             color=MaterialTheme.colorScheme.onSurfaceVariant,style=MaterialTheme.typography.bodySmall)
+        val palette=MaterialTheme.colorScheme
         Canvas(Modifier.fillMaxWidth().height(135.dp)) {
-            drawRect(Color(0xFFECE1C8))
+            drawRect(palette.surfaceVariant)
             val usable=size.width
             val count=(usable/pxCm*10).toInt().coerceIn(0,300)
             for(i in 0..count){
                 val x=i*pxCm/10f
                 val length=when {i%10==0->70f;i%5==0->48f;else->25f}
-                drawLine(Color(0xFF27364A),androidx.compose.ui.geometry.Offset(x,12f),
+                drawLine(palette.onSurfaceVariant,androidx.compose.ui.geometry.Offset(x,12f),
                     androidx.compose.ui.geometry.Offset(x,12f+length),2f)
             }
         }
