@@ -85,4 +85,10 @@ Consulta [ROADMAP](docs/ROADMAP.md) para las funciones pendientes y el plan de p
 
 Snake, Bloques y Nave incorporan controles al tocar (sin esperar a soltar), repetición al mantener pulsado donde corresponde, etiquetas accesibles, pausa al salir a segundo plano y récord local. El sonido está desactivado inicialmente; los efectos visuales/vibración se pueden desactivar. No se ha añadido un motor gráfico externo ni recursos multimedia descargados.
 
-Consulta [candidatos de juegos open source](docs/JUEGOS_OPEN_SOURCE.md) para 2048, Breakout y puzzles de Simon Tatham: licencias verificadas, tamaño del código fuente y esfuerzo de integración. Esta selección no implica que los juegos estén ya importados.
+Consulta [candidatos de juegos open source](docs/JUEGOS_OPEN_SOURCE.md) para 2048, Breakout y puzzles de Simon Tatham: licencias verificadas, tamaño del código fuente y esfuerzo de integración. Se han adaptado 2048, Breakout y Fifteen a Kotlin/Compose; los avisos de las fuentes se consultan dentro de cada juego.
+
+## Nuevos juegos offline
+
+El catálogo incluye **2048**, **Breakout** y **Puzzle 15 (Fifteen)** junto a Snake, Bloques y Nave. 2048 y Puzzle 15 conservan la partida en este dispositivo y permiten deshacer un movimiento. Breakout ofrece arrastre de pala, lanzamiento de bola, tres vidas y un nivel de 30 bloques; conserva el récord, pero reinicia la partida al volver a abrir la herramienta.
+
+Las adaptaciones usan el módulo nativo existente, gráficos propios y avisos de licencia en `feature/games/src/main/assets/licenses/`. No incorporan WebView, NDK ni audios externos. Véase [fuentes y modificaciones](docs/JUEGOS_OPEN_SOURCE.md).

@@ -41,7 +41,7 @@ object ToolRouting {
     )
     private val camera = setOf("mirror", "magnifier", "qrscan","laserlevel")
     private val educational = setOf("periodic", "physics", "triangles")
-    private val games = setOf("snake","blocks","shooter")
+    private val games = setOf("snake","blocks","shooter","2048","breakout","fifteen")
     private val personal = setOf("notes","idvault","paintmix")
     private val peruvian = setOf("earthquakes","constitution","weather")
     private val reading = setOf("bible","recipes")

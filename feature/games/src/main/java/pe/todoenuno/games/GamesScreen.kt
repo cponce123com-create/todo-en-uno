@@ -35,6 +35,9 @@ fun GamesScreen(id:String) {
         "snake"->SnakeGameScreen()
         "blocks"->BlockGameScreen()
         "shooter"->ShooterGameScreen()
+        "2048"->TileGameScreen()
+        "breakout"->BreakoutGameScreen()
+        "fifteen"->FifteenGameScreen()
         else -> Text("Juego no disponible")
     }
 }
@@ -64,7 +67,7 @@ private fun Board(modifier:Modifier,ui:GameUi,won:Boolean=false,onRestart:()->Un
 }
 
 /** Uses the dominant drag axis after a threshold; buttons remain available for accessibility. */
-private fun Modifier.swipe(enabled:Boolean,onDirection:(Direction)->Unit):Modifier=pointerInput(enabled) {
+internal fun Modifier.swipe(enabled:Boolean,onDirection:(Direction)->Unit):Modifier=pointerInput(enabled) {
     if(enabled) {
         var drag=Offset.Zero
         detectDragGestures(onDragStart={drag=Offset.Zero},onDragCancel={drag=Offset.Zero},

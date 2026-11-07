@@ -1,6 +1,6 @@
-# Juegos offline: candidatos de código abierto
+# Juegos offline: fuentes y adaptaciones
 
-Revisión: 7 de noviembre de 2026. Esta ronda mejora los tres motores propios; no incorpora código, fuentes, imágenes ni audio de terceros.
+Revisión: 7 de noviembre de 2026. 2048, Breakout y Fifteen se adaptan a motores Kotlin y pantallas Compose. Los avisos de las fuentes se incluyen en assets/licenses y se consultan desde cada juego. No se incluyen los recursos gráficos, fuentes ni audios de los proyectos originales.
 
 ## Comparación
 
@@ -28,3 +28,21 @@ Los tamaños se obtuvieron sumando `size` de blobs del árbol Git recursivo de c
 - Nave: mover y disparar con controles independientes, repetición sostenida, estela, propulsión e impactos. Corregida la colisión de proyectiles que cruzaban un enemigo entre pasos.
 - Inicio explícito, pausa al ir a segundo plano y reinicio fiable tras perder; récords y opciones guardados localmente.
 - Sonido sintetizado opcional, sin archivos de audio ni motor externo; efectos/vibración se pueden desactivar.
+
+## Integración realizada
+
+| Juego | Implementación | Progreso y controles |
+| --- | --- | --- |
+| 2048 | Port de las reglas de recorrido dirigido y fusión única de Gabriele Cirulli a `ImportedPuzzleEngines.kt`. | Deslizar o flechas; un deshacer; objetivo 2048; tablero y puntuación locales. |
+| Breakout | Adaptación de colisiones y dirección por impacto con pala de Jake Gordon a `BreakoutEngine.kt`, con gráficos y nivel propios. | Pala por arrastre o botones sostenidos, lanzamiento explícito, 3 vidas, 30 bloques. Récord local; la partida arcade se reinicia al salir del juego. |
+| Fifteen / Puzzle 15 | Port del deslizamiento alineado de `interpret_move` / `execute_move` de `fifteen.c` a `ImportedPuzzleEngines.kt`. | Tocar fila/columna del hueco; generación siempre resoluble; deshacer; tablero y movimientos locales. |
+
+No se importa toda la colección de Simon Tatham: esta integración selecciona Fifteen. El port nativo evita JNI, NDK y WebView. Los otros puzzles de la colección siguen siendo candidatos para una futura integración.
+
+### Fuentes consultadas y modificaciones
+
+- `2048/js/game_manager.js` en commit `478b6ec346e3787f589e4af751378d06ded4cbbc`: unificar una sola vez por movimiento, orden según dirección, puntuación y nueva ficha solo si hubo cambio. Se reemplazan DOM y almacenamiento web por Compose y preferencias Android; se detiene al llegar a 2048 y se añade deshacer.
+- `javascript-breakout/breakout.js` en commit `eed59e2affa9423b93d2ac8ff93061bb88b33284`: reflexión de bola y orientación según punto de impacto con pala. El port usa subpasos acotados, coordenadas normalizadas, nivel propio y audio sintetizado; no incluye el motor JavaScript, imágenes ni sonidos originales.
+- `sgtpuzzles/app/src/main/jni/fifteen.c` en commit `d1e10eb57dd80af4999e698a9ab31f546e9a0b9d`: deslizamiento de fila/columna alineada y recuento por ficha desplazada. Se genera por movimientos legales aleatorios, se validan partidas guardadas por paridad y se sustituye el frontend C/JNI por Compose. No se portan el solucionador ni las pistas upstream.
+
+Pruebas añadidas: 18 casos JVM para fusiones, movimientos inválidos, restauración, paridad de Fifteen y física de Breakout, más 3 casos instrumentados de entrada, pausa y licencias. El tamaño del APK y el consumo en dispositivo se deben medir tras compilar; los tamaños del snapshot de la tabla anterior no representan el incremento de esta app.
