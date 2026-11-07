@@ -1,4 +1,4 @@
-package pe.todoenuno.utilities
+package pe.todoenuno.sensor
 
 import android.content.Context
 import android.hardware.camera2.CameraCharacteristics

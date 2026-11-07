@@ -1,4 +1,4 @@
-package pe.todoenuno.utilities
+package pe.todoenuno.sensor
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Arrangement
