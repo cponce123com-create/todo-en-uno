@@ -48,7 +48,8 @@ private class RecorderEngine(private val context: Context) {
         val dir = File(context.filesDir,"recordings").apply { mkdirs() }
         val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss_SSS",Locale.ROOT).format(Date())
         val file = File(dir,"Grabacion_$timestamp.m4a")
-        val recorder=if(Build.VERSION.SDK_INT>=31) MediaRecorder(context) else @Suppress("DEPRECATION") MediaRecorder()
+        @Suppress("DEPRECATION")
+        val recorder=if(Build.VERSION.SDK_INT>=31) MediaRecorder(context) else MediaRecorder()
         try {
             recorder.setAudioSource(MediaRecorder.AudioSource.MIC)
             recorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4)
