@@ -80,3 +80,9 @@ Consulta [ROADMAP](docs/ROADMAP.md) para las funciones pendientes y el plan de p
 - Temporizador: conceder permiso durante una cuenta programa el aviso pendiente.
 - Grabaciones: exportación fuera del hilo de interfaz y preparación asíncrona del reproductor.
 - Sismos: orden cronológico antes de limitar resultados. Se consulta la capa histórica oficial Sismos Reportados del IGP, ordenada por fechaevento descendente, con hasta 30 reportes por consulta y 100 eventos guardados localmente.
+
+## Juegos offline y controles
+
+Snake, Bloques y Nave incorporan controles al tocar (sin esperar a soltar), repetición al mantener pulsado donde corresponde, etiquetas accesibles, pausa al salir a segundo plano y récord local. El sonido está desactivado inicialmente; los efectos visuales/vibración se pueden desactivar. No se ha añadido un motor gráfico externo ni recursos multimedia descargados.
+
+Consulta [candidatos de juegos open source](docs/JUEGOS_OPEN_SOURCE.md) para 2048, Breakout y puzzles de Simon Tatham: licencias verificadas, tamaño del código fuente y esfuerzo de integración. Esta selección no implica que los juegos estén ya importados.
