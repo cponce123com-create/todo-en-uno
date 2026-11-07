@@ -106,6 +106,7 @@ fun EarthquakesPeruScreen() {
     var status by remember{mutableStateOf("")}
     var updated by remember{mutableStateOf(prefs.getLong("updated",0L))}
     var loading by remember{mutableStateOf(false)}
+    var showAll by remember{mutableStateOf(false)}
 
     fun refresh(){
         if(loading)return
@@ -155,7 +156,7 @@ fun EarthquakesPeruScreen() {
             style=MaterialTheme.typography.bodySmall)
         if(reports.isEmpty() && !loading)Text("Pulsa actualizar para consultar el evento disponible.")
         Text("Últimos ${minOf(5,reports.size)} reportes guardados")
-        reports.take(5).forEach {event->
+        (if(showAll)reports else reports.take(5)).forEach {event->
             Card(Modifier.fillMaxWidth()){
                 Column(Modifier.padding(15.dp),verticalArrangement=Arrangement.spacedBy(4.dp)){
                     Text("Magnitud: ${event.magnitude ?: "N/D"}",
@@ -168,7 +169,9 @@ fun EarthquakesPeruScreen() {
                 }
             }
         }
-        if(reports.size>5) Text("Historial local: ${reports.size} eventos guardados.")
+        if(reports.size>5) Button(onClick={showAll=!showAll}) {
+            Text(if(showAll)"Mostrar solo los últimos cinco" else "Ver historial local (${reports.size} eventos)")
+        }
         Button(onClick={
             context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(IgpService.PAGE)))
         },modifier=Modifier.fillMaxWidth()) {
