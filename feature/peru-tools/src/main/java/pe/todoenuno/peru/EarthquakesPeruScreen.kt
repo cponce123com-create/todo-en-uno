@@ -30,6 +30,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONObject
+import org.json.JSONArray
 import java.net.HttpURLConnection
 import java.net.URL
 import java.text.SimpleDateFormat
@@ -68,6 +69,20 @@ object IgpService {
             )
         }.take(30)
     }
+    fun newestFirst(events:List<QuakeReport>):List<QuakeReport> {
+        val formats=listOf("dd/MM/yyyy HH:mm:ss","dd/MM/yyyy HH:mm","yyyy-MM-dd HH:mm:ss","yyyy-MM-dd HH:mm")
+        fun timestamp(event:QuakeReport):Long {
+            val raw="${event.date} ${event.time}".trim()
+            for(pattern in formats) {
+                val parsed=runCatching {
+                    SimpleDateFormat(pattern,Locale("es","PE")).apply { isLenient=false }.parse(raw)
+                }.getOrNull()
+                if(parsed!=null)return parsed.time
+            }
+            return 0L
+        }
+        return events.sortedByDescending(::timestamp)
+    }
     fun fetch():List<QuakeReport> {
         val conn=(URL(ENDPOINT).openConnection() as HttpURLConnection).apply {
             connectTimeout=9000
@@ -89,10 +104,23 @@ fun EarthquakesPeruScreen() {
     val context=LocalContext.current
     val scope=rememberCoroutineScope()
     val prefs=remember(context){context.getSharedPreferences("igp_last_query",Context.MODE_PRIVATE)}
-    var reports by remember{mutableStateOf<List<QuakeReport>>(emptyList())}
+    var reports by remember{mutableStateOf<List<QuakeReport>>(runCatching {
+        val saved=JSONArray(prefs.getString("reports","[]"))
+        (0 until saved.length()).map { i ->
+            val o=saved.getJSONObject(i)
+            QuakeReport(
+                o.optDouble("magnitude").takeIf{!o.isNull("magnitude") && it.isFinite()},
+                o.optDouble("depthKm").takeIf{!o.isNull("depthKm") && it.isFinite()},
+                o.optString("date"),o.optString("time"),o.optString("reference"),
+                o.optDouble("latitude").takeIf{!o.isNull("latitude") && it.isFinite()},
+                o.optDouble("longitude").takeIf{!o.isNull("longitude") && it.isFinite()}
+            )
+        }
+    }.getOrDefault(emptyList()))}
     var status by remember{mutableStateOf("")}
     var updated by remember{mutableStateOf(prefs.getLong("updated",0L))}
     var loading by remember{mutableStateOf(false)}
+    var showAll by remember{mutableStateOf(false)}
 
     fun refresh(){
         if(loading)return
@@ -100,9 +128,23 @@ fun EarthquakesPeruScreen() {
         scope.launch{
             runCatching{withContext(Dispatchers.IO){IgpService.fetch()}}
                 .onSuccess {list->
-                    reports=list
+                    // Keep a bounded local history across app restarts; never invent events.
+                    reports=IgpService.newestFirst((list+reports).distinctBy {
+                        "${it.date}|${it.time}|${it.reference}|${it.magnitude}"
+                    }).take(100)
                     updated=System.currentTimeMillis()
-                    prefs.edit().putLong("updated",updated).apply()
+                    val json=JSONArray()
+                    reports.forEach { event ->
+                        json.put(JSONObject().apply {
+                            put("magnitude",event.magnitude ?: JSONObject.NULL)
+                            put("depthKm",event.depthKm ?: JSONObject.NULL)
+                            put("date",event.date);put("time",event.time)
+                            put("reference",event.reference)
+                            put("latitude",event.latitude ?: JSONObject.NULL)
+                            put("longitude",event.longitude ?: JSONObject.NULL)
+                        })
+                    }
+                    prefs.edit().putLong("updated",updated).putString("reports",json.toString()).apply()
                     status=if(list.isEmpty())"El servicio no devolvió eventos." else "Consulta completada."
                 }.onFailure{status="No fue posible consultar el IGP. Revisa tu conexión."}
             loading=false
@@ -127,7 +169,8 @@ fun EarthquakesPeruScreen() {
             color=MaterialTheme.colorScheme.onSurfaceVariant,
             style=MaterialTheme.typography.bodySmall)
         if(reports.isEmpty() && !loading)Text("Pulsa actualizar para consultar el evento disponible.")
-        reports.forEach {event->
+        Text("Últimos ${minOf(5,reports.size)} reportes guardados")
+        (if(showAll)reports else reports.take(5)).forEach {event->
             Card(Modifier.fillMaxWidth()){
                 Column(Modifier.padding(15.dp),verticalArrangement=Arrangement.spacedBy(4.dp)){
                     Text("Magnitud: ${event.magnitude ?: "N/D"}",
@@ -140,12 +183,15 @@ fun EarthquakesPeruScreen() {
                 }
             }
         }
+        if(reports.size>5) Button(onClick={showAll=!showAll}) {
+            Text(if(showAll)"Mostrar solo los últimos cinco" else "Ver historial local (${reports.size} eventos)")
+        }
         Button(onClick={
             context.startActivity(Intent(Intent.ACTION_VIEW,Uri.parse(IgpService.PAGE)))
         },modifier=Modifier.fillMaxWidth()) {
             Text("Ver reportes y antecedentes en portal oficial")
         }
-        Text("El servicio geográfico muestra el último evento publicado, no una base histórica completa. Para otros reportes, abre la web oficial. La app no crea ni modifica magnitudes.",
+        Text("El historial local conserva eventos consultados previamente (máximo 100), pero no reemplaza una fuente histórica oficial. La app no crea ni modifica magnitudes.",
             style=MaterialTheme.typography.bodySmall,
             color=MaterialTheme.colorScheme.onSurfaceVariant)
     }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedCard
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -65,7 +67,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
             "√" -> expression + "sqrt("
             "∛" -> expression + "cbrt("
             "±" -> if (expression.isBlank()) "-" else "-($expression)"
-            "sin","cos","tan","asin","acos","atan","log","ln","abs" -> expression + token + "("
+            "sin","cos","tan","asin","acos","atan","log","ln","abs","exp" -> expression + token + "("
             else -> expression + token
         }.take(240)
         if (token == "AC") lastResult = "0"
@@ -84,8 +86,11 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
             onFailure = { error = it.message ?: "Expresión no válida." }
         )
     }
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+    val compact = maxHeight < 700.dp
+    val keyHeight = ((maxHeight - if(compact) 230.dp else 300.dp) / 8).coerceIn(36.dp, 56.dp)
     Column(
-        Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(12.dp),
+        Modifier.fillMaxSize().padding(if(compact) 6.dp else 12.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
@@ -95,30 +100,12 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                 Text(if(showHistory)"Ocultar historial" else "Historial")
             }
         }
-        if(showHistory) {
-            ElevatedCard {
-                Column(Modifier.fillMaxWidth().padding(12.dp),
-                    verticalArrangement=Arrangement.spacedBy(6.dp)) {
-                    if(history.isEmpty()) Text("No hay cálculos guardados.")
-                    history.forEach { item ->
-                        TextButton(onClick={
-                            expression=item.substringBefore(" = ")
-                            showHistory=false
-                        }) { Text(item,style=MaterialTheme.typography.bodySmall) }
-                    }
-                    if(history.isNotEmpty()) TextButton(onClick={
-                        history=emptyList()
-                        preferences.edit().remove("items").apply()
-                    }) {Text("Borrar historial")}
-                }
-            }
-        }
         ElevatedCard(
             modifier=Modifier.fillMaxWidth(),
             shape=RoundedCornerShape(22.dp)
         ) {
             Column(
-                modifier=Modifier.fillMaxWidth().padding(18.dp),
+                modifier=Modifier.fillMaxWidth().padding(if(compact) 8.dp else 18.dp),
                 verticalArrangement=Arrangement.spacedBy(6.dp)
             ) {
                 Text("Expresión",style=MaterialTheme.typography.labelMedium,
@@ -127,12 +114,12 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                     value=expression,
                     onValueChange={expression=it.take(240);error=null},
                     modifier=Modifier.fillMaxWidth(),
-                    maxLines=3,
+                    maxLines=if(compact) 1 else 2,
                     placeholder={Text("Ej. sin(45)^2 + cos(45)^2")},
                     keyboardOptions=KeyboardOptions.Default,
                 )
                 Text(lastResult,modifier=Modifier.fillMaxWidth(),
-                    textAlign=TextAlign.End,fontSize=31.sp,
+                    textAlign=TextAlign.End,fontSize=if(compact) 25.sp else 31.sp,
                     fontWeight=FontWeight.Bold,
                     color=MaterialTheme.colorScheme.primary)
                 error?.let {
@@ -150,7 +137,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                 }
             }
         }
-        Text("Funciones científicas",style=MaterialTheme.typography.labelLarge,
+        if(!compact) Text("Funciones científicas",style=MaterialTheme.typography.labelLarge,
             modifier=Modifier.padding(top=4.dp))
         val keys=listOf(
             listOf("asin","acos","atan","DEG/RAD","⌫"),
@@ -166,7 +153,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
                 row.forEach { key ->
                     val operator=key in setOf("+","−","×","÷","=")
-                    val modifier=Modifier.weight(1f).height(48.dp)
+                    val modifier=Modifier.weight(1f).height(keyHeight)
                     Button(
                         onClick={
                             when(key) {
@@ -200,8 +187,30 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                 }
             }
         }
-        Text("Operaciones locales. Usa funciones como sin(45), sqrt(9), 5!, 2^3 y DEG/RAD.",
+        if(!compact) Text("Operaciones locales. Usa funciones como sin(45), sqrt(9), 5!, 2^3 y DEG/RAD.",
             style=MaterialTheme.typography.bodySmall,
             color=MaterialTheme.colorScheme.onSurfaceVariant)
+    }
+    if(showHistory) {
+        AlertDialog(
+            onDismissRequest={showHistory=false},
+            title={Text("Historial de cálculos")},
+            text={
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+                    if(history.isEmpty()) Text("No hay cálculos guardados.")
+                    history.forEach { item ->
+                        TextButton(onClick={expression=item.substringBefore(" = ");showHistory=false}) {
+                            Text(item,style=MaterialTheme.typography.bodySmall)
+                        }
+                    }
+                    if(history.isNotEmpty()) TextButton(onClick={
+                        history=emptyList()
+                        preferences.edit().remove("items").apply()
+                    }) {Text("Borrar historial")}
+                }
+            },
+            confirmButton={TextButton(onClick={showHistory=false}){Text("Cerrar")}}
+        )
+    }
     }
 }

@@ -80,10 +80,20 @@ fun ConstitutionScreen() {
                                 }
                             }
                         }?:error("No se pudo abrir el PDF")
-                        require(tmp.renameTo(file)){"No se pudo guardar la Constitución"}
-                        ParcelFileDescriptor.open(file,ParcelFileDescriptor.MODE_READ_ONLY).use {fd->
+                        ParcelFileDescriptor.open(tmp,ParcelFileDescriptor.MODE_READ_ONLY).use {fd->
                             PdfRenderer(fd).use {require(it.pageCount>0)}
                         }
+                        // Keep the previous validated document until replacement succeeds.
+                        val backup=File(file.parentFile,"constitution.previous.pdf")
+                        if(file.exists()) {
+                            backup.delete()
+                            require(file.renameTo(backup)){"No se pudo respaldar la edición anterior"}
+                        }
+                        if(!tmp.renameTo(file)) {
+                            if(backup.exists()) check(backup.renameTo(file)){"No se pudo restaurar la edición anterior"}
+                            throw IllegalStateException("No se pudo guardar la Constitución")
+                        }
+                        backup.delete()
                     }
                 }.onSuccess{
                     documentLoaded=true;page=0;reloaded++

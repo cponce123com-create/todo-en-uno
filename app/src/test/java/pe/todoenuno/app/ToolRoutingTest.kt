@@ -11,9 +11,13 @@ class ToolRoutingTest {
         ToolCatalog.tools.forEach { tool ->
             assertNotNull("Falta ruta: ${tool.id}", ToolRouting.domain(tool.id))
         }
-        assertEquals(49, ToolCatalog.tools.size)
+        assertEquals(51, ToolCatalog.tools.size)
     }
 
+    @Test fun newToolsAreRouted() {
+        assertEquals(ToolDomain.PERU, ToolRouting.domain("weather"))
+        assertEquals(ToolDomain.PARANORMAL, ToolRouting.domain("paranormal"))
+    }
     @Test fun invalidIdDoesNotCrashNavigation() {
         assertNull(ToolRouting.domain("fake_tool"))
     }

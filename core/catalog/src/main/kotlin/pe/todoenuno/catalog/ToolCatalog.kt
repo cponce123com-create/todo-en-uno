@@ -14,7 +14,8 @@ enum class ToolCategory(val title: String) {
     JUEGOS("Juegos offline"),
     PERSONAL("Personal"),
     LECTURA("Biblioteca y lectura"),
-    PERU("Perú")
+    PERU("Perú"),
+    PARANORMAL("Paranormal (entretenimiento)")
 }
 
 data class ToolDefinition(
@@ -75,6 +76,8 @@ object ToolCatalog {
         ToolDefinition("bible", "Biblia RV1909", "66 libros disponibles sin conexión", "📖", ToolCategory.LECTURA),
         ToolDefinition("paintmix", "Mezclar colores", "Tabla y combinación de pinturas", "🎨", ToolCategory.PERSONAL),
         ToolDefinition("constitution", "Constitución del Perú", "Importa la edición oficial para leer offline", "⚖️", ToolCategory.PERU),
+        ToolDefinition("weather", "Clima y temperatura", "Temperatura y condiciones meteorológicas por ciudad", "🌤️", ToolCategory.PERU),
+        ToolDefinition("paranormal", "Laboratorio paranormal", "Simuladores recreativos y campo magnético", "👻", ToolCategory.PARANORMAL),
         ToolDefinition("recipes", "Recetario EPUB", "Importa libros y lee sin conexión", "🍲", ToolCategory.LECTURA),
     )
 
