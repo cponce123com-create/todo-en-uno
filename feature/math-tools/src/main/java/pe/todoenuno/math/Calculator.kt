@@ -19,6 +19,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -119,8 +120,17 @@ private val keypad = listOf(
 @Composable
 fun CalculatorScreen() {
     var state by remember { mutableStateOf(CalcState()) }
-    var scientific by remember { mutableStateOf(false) }
-    CalculatorBody(state = state, scientific=scientific, onToggle={scientific=!scientific}, onKey = { state = CalculatorEngine.press(state, it) })
+    var scientific by rememberSaveable { mutableStateOf(true) }
+    if (scientific) {
+        ScientificCalculatorScreen(onBasicMode = { scientific = false })
+    } else {
+        CalculatorBody(
+            state = state,
+            scientific = false,
+            onToggle = { scientific = true },
+            onKey = { state = CalculatorEngine.press(state, it) }
+        )
+    }
 }
 
 @Composable
