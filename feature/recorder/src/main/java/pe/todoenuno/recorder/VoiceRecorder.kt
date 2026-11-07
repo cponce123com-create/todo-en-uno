@@ -27,6 +27,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -94,6 +98,8 @@ fun VoiceRecorderScreen() {
     var playing by remember { mutableStateOf<String?>(null) }
     var player by remember { mutableStateOf<MediaPlayer?>(null) }
     var notice by remember { mutableStateOf<String?>(null) }
+    val scope=rememberCoroutineScope()
+    var exporting by remember{mutableStateOf(false)}
     var toExport by remember { mutableStateOf<File?>(null) }
     var allowed by remember { mutableStateOf(
         ContextCompat.checkSelfPermission(context,Manifest.permission.RECORD_AUDIO)==PackageManager.PERMISSION_GRANTED
@@ -105,13 +111,19 @@ fun VoiceRecorderScreen() {
     }
     val export=rememberLauncherForActivityResult(ActivityResultContracts.CreateDocument("audio/mp4")){ uri ->
         val file=toExport
-        if(uri!=null && file!=null) {
-            runCatching {
-                context.contentResolver.openOutputStream(uri)?.use { out ->
-                    file.inputStream().use { input -> input.copyTo(out) }
-                } ?: error("No se pudo crear el archivo")
-            }.onSuccess { notice="Grabación exportada correctamente." }
-                .onFailure { notice="Error al exportar: ${it.localizedMessage}" }
+        if(uri!=null && file!=null) scope.launch {
+            exporting=true
+            try {
+                withContext(Dispatchers.IO) {
+                    context.contentResolver.openOutputStream(uri)?.use { out ->
+                        file.inputStream().use { input -> input.copyTo(out) }
+                    } ?: error("No se pudo crear el archivo")
+                }
+                notice="Grabación exportada correctamente."
+            } catch(e:Exception) {
+                if(e is kotlinx.coroutines.CancellationException)throw e
+                notice="Error al exportar: ${e.localizedMessage}"
+            } finally {exporting=false}
         }
         toExport=null
     }
@@ -157,21 +169,36 @@ fun VoiceRecorderScreen() {
                 Row(horizontalArrangement=Arrangement.spacedBy(9.dp)) {
                     OutlinedButton(onClick={
                         if(playing==file.path) {
-                            player?.stop();player?.release();player=null;playing=null
+                            player?.release();player=null;playing=null
                         } else {
                             player?.release()
+                            val candidate=MediaPlayer()
+                            player=candidate
+                            playing=file.path
                             runCatching {
-                                MediaPlayer().apply {
-                                    setDataSource(file.absolutePath)
-                                    prepare()
-                                    setOnCompletionListener { it.release();player=null;playing=null }
-                                    start()
+                                candidate.setDataSource(file.absolutePath)
+                                candidate.setOnPreparedListener {
+                                    if(player===it)it.start()
                                 }
-                            }.onSuccess { player=it;playing=file.path }
-                                .onFailure { player=null;playing=null;notice="No se puede reproducir este archivo." }
+                                candidate.setOnCompletionListener {
+                                    if(player===it){player=null;playing=null}
+                                    it.release()
+                                }
+                                candidate.setOnErrorListener { failed,_,_ ->
+                                    if(player===failed){player=null;playing=null}
+                                    failed.release()
+                                    notice="No se puede reproducir este archivo."
+                                    true
+                                }
+                                candidate.prepareAsync()
+                            }.onFailure {
+                                candidate.release()
+                                player=null;playing=null
+                                notice="No se puede reproducir este archivo."
+                            }
                         }
                     }) {Text(if(playing==file.path)"Detener" else "Escuchar")}
-                    OutlinedButton(onClick={toExport=file;export.launch(file.name)}) {Text("Exportar")}
+                    OutlinedButton(enabled=!exporting && toExport==null,onClick={toExport=file;export.launch(file.name)}) {Text("Exportar")}
                 }
                 HorizontalDivider()
             }

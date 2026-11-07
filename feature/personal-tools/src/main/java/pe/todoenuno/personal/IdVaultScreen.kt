@@ -42,6 +42,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.ByteArrayOutputStream
@@ -66,6 +68,7 @@ class LocalIdVault(private val context:Context) {
     }
     fun exists(side:String)=file(side).exists()
 
+    @Synchronized
     private fun key():SecretKey {
         val store=KeyStore.getInstance("AndroidKeyStore").apply{load(null)}
         (store.getKey(alias,null) as? SecretKey)?.let{return it}
@@ -81,6 +84,7 @@ class LocalIdVault(private val context:Context) {
         )
         return generator.generateKey()
     }
+    @Synchronized
     fun save(side:String,raw:ByteArray) {
         require(raw.isNotEmpty() && raw.size<=12*1024*1024) {
             "La imagen no debe superar 12 MB."
@@ -107,6 +111,7 @@ class LocalIdVault(private val context:Context) {
         cipher.init(Cipher.DECRYPT_MODE,key(),GCMParameterSpec(128,bytes.copyOfRange(1,1+ivSize)))
         return cipher.doFinal(bytes.copyOfRange(1+ivSize,bytes.size))
     }
+    @Synchronized
     fun delete(side:String)=file(side).delete()
 }
 
@@ -127,9 +132,14 @@ fun IdVaultScreen() {
     var back by remember{mutableStateOf(vault.exists("back"))}
     var bitmap by remember{mutableStateOf<Bitmap?>(null)}
     var status by remember{mutableStateOf("")}
+    val requests=remember{VaultRequests()}
+    var loadJob by remember{mutableStateOf<Job?>(null)}
+    var importing by remember{mutableStateOf(false)}
+    var importSide by remember{mutableStateOf<String?>(null)}
     fun lock() {
+        requests.invalidate()
+        loadJob?.cancel()
         unlocked=false
-        bitmap?.recycle()
         bitmap=null
     }
     DisposableEffect(activity,lifecycle) {
@@ -145,8 +155,12 @@ fun IdVaultScreen() {
         }
     }
     fun show(side:String) {
+        if(!unlocked)return
         selected=side
-        scope.launch {
+        bitmap=null
+        val ticket=requests.next()
+        loadJob?.cancel()
+        loadJob=scope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
                     val data=vault.load(side)?:return@withContext null
@@ -160,24 +174,21 @@ fun IdVaultScreen() {
                     } finally {data.fill(0)}
                 }
             }.onSuccess {bmp ->
-                bitmap?.recycle()
+                if(!unlocked || !requests.isCurrent(ticket))return@onSuccess
                 bitmap=bmp
                 status=if(bmp==null)"No hay imagen guardada." else ""
-            }.onFailure{status="No se pudo abrir la imagen cifrada."}
+            }.onFailure{
+                if(it is CancellationException)throw it
+                if(unlocked && requests.isCurrent(ticket))status="No se pudo abrir la imagen cifrada."
+            }
         }
     }
-    val verify=rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ){result ->
-        if(result.resultCode==android.app.Activity.RESULT_OK) {
-            unlocked=true
-            show(selected)
-        } else status="No se autorizó el acceso."
-    }
-    val pick=rememberLauncherForActivityResult(
-        ActivityResultContracts.GetContent()
-    ){uri ->
-        if(uri!=null && unlocked) scope.launch {
+    var pendingPhoto by remember{mutableStateOf<android.net.Uri?>(null)}
+    var pendingSide by remember{mutableStateOf<String?>(null)}
+    fun importPhoto(uri:android.net.Uri,side:String) {
+        if(importing)return
+        importing=true
+        scope.launch {
             runCatching {
                 withContext(Dispatchers.IO) {
                     val raw=context.contentResolver.openInputStream(uri)?.use{input ->
@@ -191,14 +202,45 @@ fun IdVaultScreen() {
                         }
                         output.toByteArray()
                     }?:error("No se pudo abrir la foto.")
-                    try {vault.save(selected,raw)} finally{raw.fill(0)}
+                    try {vault.save(side,raw)} finally{raw.fill(0)}
                 }
             }.onSuccess {
                 front=vault.exists("front")
                 back=vault.exists("back")
                 status="Foto guardada cifrada, únicamente en este teléfono."
-                show(selected)
-            }.onFailure{status="No se pudo guardar: ${it.message}"}
+                if(unlocked && selected==side)show(side)
+            }.onFailure{
+                if(it is CancellationException)throw it
+                status="No se pudo guardar: ${it.message}"
+            }
+            importing=false
+        }
+    }
+    val verify=rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ){result ->
+        if(result.resultCode==android.app.Activity.RESULT_OK) {
+            unlocked=true
+            val uri=pendingPhoto
+            val side=pendingSide
+            pendingPhoto=null;pendingSide=null
+            if(uri!=null && side!=null)importPhoto(uri,side) else show(selected)
+        } else {
+            pendingPhoto=null;pendingSide=null
+            status="No se autorizó el acceso."
+        }
+    }
+    val pick=rememberLauncherForActivityResult(
+        ActivityResultContracts.GetContent()
+    ){uri ->
+        val side=importSide
+        importSide=null
+        if(uri!=null && side!=null) {
+            if(unlocked)importPhoto(uri,side)
+            else {
+                pendingPhoto=uri;pendingSide=side
+                status="Desbloquea la bóveda para guardar la foto seleccionada."
+            }
         }
     }
     Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(16.dp),
@@ -219,8 +261,8 @@ fun IdVaultScreen() {
             }) {Text("Desbloquear bóveda")}
         } else {
             Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-                Button(onClick={show("front")}){Text("Frente")}
-                Button(onClick={show("back")}){Text("Reverso")}
+                Button(enabled=!importing,onClick={show("front")}){Text("Frente")}
+                Button(enabled=!importing,onClick={show("back")}){Text("Reverso")}
                 TextButton(onClick={lock()}){Text("Bloquear")}
             }
             Card(Modifier.fillMaxWidth()){
@@ -231,10 +273,10 @@ fun IdVaultScreen() {
                         modifier=Modifier.fillMaxWidth().height(270.dp))
                 } else Text("No hay vista previa.",Modifier.padding(20.dp))
             }
-            Button(onClick={pick.launch("image/*")}) {
+            Button(enabled=!importing,onClick={importSide=selected;pick.launch("image/*")}) {
                 Text("Elegir foto de ${if(selected=="front")"frente" else "reverso"}")
             }
-            TextButton(onClick={
+            TextButton(enabled=!importing,onClick={
                 vault.delete(selected)
                 front=vault.exists("front")
                 back=vault.exists("back")

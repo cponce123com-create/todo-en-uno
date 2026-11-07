@@ -56,7 +56,7 @@ object IgpService {
         val root=JSONObject(json)
         if(root.has("error"))error("El servicio del IGP devolvió un error.")
         val array=root.optJSONArray("features")?:return emptyList()
-        return (0 until array.length()).mapNotNull {idx->
+        return newestFirst((0 until array.length()).mapNotNull {idx->
             val attrs=array.optJSONObject(idx)?.optJSONObject("attributes")?:return@mapNotNull null
             QuakeReport(
                 attrs.optDouble("magnitud").takeIf{it.isFinite()},
@@ -67,7 +67,7 @@ object IgpService {
                 attrs.optDouble("latitud").takeIf{it.isFinite()},
                 attrs.optDouble("longitud").takeIf{it.isFinite()}
             )
-        }.take(30)
+        }).take(30)
     }
     fun newestFirst(events:List<QuakeReport>):List<QuakeReport> {
         val formats=listOf("dd/MM/yyyy HH:mm:ss","dd/MM/yyyy HH:mm","yyyy-MM-dd HH:mm:ss","yyyy-MM-dd HH:mm")
@@ -75,7 +75,7 @@ object IgpService {
             val raw="${event.date} ${event.time}".trim()
             for(pattern in formats) {
                 val parsed=runCatching {
-                    SimpleDateFormat(pattern,Locale("es","PE")).apply { isLenient=false }.parse(raw)
+                    SimpleDateFormat(pattern,Locale("es","PE")).apply { isLenient=false;timeZone=java.util.TimeZone.getTimeZone("America/Lima") }.parse(raw)
                 }.getOrNull()
                 if(parsed!=null)return parsed.time
             }
@@ -179,6 +179,8 @@ fun EarthquakesPeruScreen() {
             style=MaterialTheme.typography.bodySmall)
         if(reports.isEmpty() && !loading)Text("Pulsa actualizar para consultar el evento disponible.")
         Text("Últimos ${minOf(5,reports.size)} reportes guardados")
+        if(reports.size<5)Text("La fuente consultada publica el último sismo. El historial local irá acumulando los eventos que consultes; aún no hay cinco guardados.",
+            style=MaterialTheme.typography.bodySmall)
         (if(showAll)reports else reports.take(5)).forEach {event->
             Card(Modifier.fillMaxWidth()){
                 Column(Modifier.padding(15.dp),verticalArrangement=Arrangement.spacedBy(4.dp)){

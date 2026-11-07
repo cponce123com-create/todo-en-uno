@@ -10,6 +10,16 @@ class IgpServiceTest {
         assertEquals(listOf(newer,older),IgpService.newestFirst(listOf(older,newer)))
     }
 
+    @Test fun newestEventAfterThirtyOlderRowsIsNotDropped() {
+        val rows=(1..31).joinToString(",") { day ->
+            """{"attributes":{"fecha_local":"${day.toString().padStart(2,'0')}/10/2026","hora_local":"12:00","referencia":"Evento $day"}}"""
+        }
+        val decoded=IgpService.decode("""{"features":[$rows]}""")
+        assertEquals(30,decoded.size)
+        assertEquals("Evento 31",decoded.first().reference)
+        assertEquals("Evento 2",decoded.last().reference)
+    }
+
     @Test fun decodeOfficialFields(){
         val data="""{"features":[{"attributes":{"magnitud":4.4,"profundidad":32.5,"fecha_local":"05/11/2026","hora_local":"14:20","referencia":"Arequipa","latitud":-16.4,"longitud":-71.5}}]}"""
         val report=IgpService.decode(data).single()

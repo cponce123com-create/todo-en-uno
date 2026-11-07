@@ -46,14 +46,19 @@ fun CountdownScreen() {
     var permissionGranted by remember { mutableStateOf(
         Build.VERSION.SDK_INT<33 || ContextCompat.checkSelfPermission(context,Manifest.permission.POST_NOTIFICATIONS)==PackageManager.PERMISSION_GRANTED
     ) }
-    val requestNotice=rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()){
-        permissionGranted=it
-        reminderEnabled=it
-    }
     var minutes by rememberSaveable { mutableStateOf("5") }
     var remaining by rememberSaveable { mutableLongStateOf(300000L) }
     var endTime by rememberSaveable { mutableLongStateOf(0L) }
     var running by rememberSaveable { mutableStateOf(false) }
+
+    val requestNotice=rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()){
+        permissionGranted=it
+        reminderEnabled=it
+        if(it && running) {
+            val left=(endTime-SystemClock.elapsedRealtime()).coerceAtLeast(0L)
+            if(left>0L)TimerReminders.schedule(context,left)
+        }
+    }
 
     LaunchedEffect(running) {
         while (running) {

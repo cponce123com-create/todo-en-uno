@@ -81,9 +81,11 @@ object SimpleEpubReader {
             val html=files[path]?.toString(Charsets.UTF_8)?:return@mapNotNull null
             val safe=html.replace(Regex("<(script|style)[^>]*>[\\s\\S]*?</\\1>",RegexOption.IGNORE_CASE),"")
             val text=Html.fromHtml(safe,Html.FROM_HTML_MODE_COMPACT).toString()
-                .replace(Regex("\\n{3,}"),"\n\n").trim().take(65000)
+                .replace(Regex("\\n{3,}"),"\n\n").trim()
+            require(text.length<=65000){"Una sección supera 65 000 caracteres. Divide el EPUB en secciones más pequeñas; no se importó contenido parcial."}
             if(text.isBlank())null else EpubChapter("Sección ${chaptersTitle(id,href)}",text)
-        }.take(400)
+        }
+        require(chapters.size<=400){"El EPUB supera 400 secciones; no se importó contenido parcial."}
         require(chapters.isNotEmpty()){"El EPUB no contiene capítulos de texto compatibles o está protegido."}
         return EpubBook(title.ifBlank{file.nameWithoutExtension},chapters)
     }
