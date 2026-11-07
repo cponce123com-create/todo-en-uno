@@ -1,4 +1,4 @@
-package pe.todoenuno.utilities
+package pe.todoenuno.location
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

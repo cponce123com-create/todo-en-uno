@@ -1,4 +1,4 @@
-package pe.todoenuno.utilities
+package pe.todoenuno.location
 
 import android.Manifest
 import android.content.Intent

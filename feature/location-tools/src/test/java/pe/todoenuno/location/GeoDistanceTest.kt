@@ -1,4 +1,4 @@
-package pe.todoenuno.utilities
+package pe.todoenuno.location
 
 import org.junit.Assert.*
 import org.junit.Test
