@@ -6,7 +6,7 @@ plugins {
 
 android {
     namespace = "pe.todoenuno.app"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "pe.todoenuno.app"
