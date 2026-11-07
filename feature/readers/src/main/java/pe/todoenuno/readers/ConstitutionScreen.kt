@@ -65,12 +65,17 @@ fun ConstitutionScreen() {
     var documentLoaded by remember{mutableStateOf(file.exists())}
     var reloaded by remember{mutableIntStateOf(0)}
     var jump by remember{mutableStateOf("")}
-    var busy by remember{mutableStateOf(false)}
+    var busy by remember{mutableStateOf(true)}
     LaunchedEffect(Unit) {
         if(epubFile.exists()) epubBook=runCatching {
             withContext(Dispatchers.IO){SimpleEpubReader.parse(epubFile)}
+        }.onFailure {
+            if(it is kotlinx.coroutines.CancellationException)throw it
+            error="No se pudo abrir el EPUB guardado. Puedes importar otra edición."
         }.getOrNull()
         epubBook?.let { epubChapter=epubChapter.coerceIn(0,it.chapters.lastIndex) }
+        if(epubBook==null)epubMode=false
+        busy=false
     }
     val epubPicker=rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()){uri->
         if(uri!=null) {
@@ -78,38 +83,15 @@ fun ConstitutionScreen() {
             scope.launch {
                 runCatching {
                     withContext(Dispatchers.IO) {
-                        epubFile.parentFile?.mkdirs()
-                        val temp=File(epubFile.parentFile,"constitution-epub.tmp")
-                        try {
-                            context.contentResolver.openInputStream(uri)?.use { input ->
-                                temp.outputStream().use { output ->
-                                    val buffer=ByteArray(8192)
-                                    var total=0L
-                                    while(true) {
-                                        val count=input.read(buffer)
-                                        if(count<0)break
-                                        total+=count
-                                        require(total<=30L*1024*1024){"Máximo 30 MB."}
-                                        output.write(buffer,0,count)
-                                    }
-                                }
-                            } ?: throw IllegalStateException("No se pudo abrir el EPUB")
-                            val parsed=SimpleEpubReader.parse(temp)
-                            val backup=File(epubFile.parentFile,"constitution-epub.previous")
-                            if(epubFile.exists()) {
-                                backup.delete()
-                                require(epubFile.renameTo(backup)){"No se pudo respaldar el EPUB anterior"}
-                            }
-                            if(!temp.renameTo(epubFile)) {
-                                if(backup.exists()) check(backup.renameTo(epubFile)){"No se pudo restaurar el EPUB anterior"}
-                                throw IllegalStateException("No se pudo guardar el EPUB")
-                            }
-                            backup.delete()
-                            parsed
-                        } finally { temp.delete() }
+                        context.contentResolver.openInputStream(uri)?.use { input ->
+                            EpubImporter.importBook(input,epubFile)
+                        }?:error("No se pudo abrir el EPUB")
                     }
                 }.onSuccess { epubBook=it;epubChapter=0;epubMode=true;error="" }
-                    .onFailure { error="No se pudo importar el EPUB: ${it.message}" }
+                    .onFailure {
+                        if(it is kotlinx.coroutines.CancellationException)throw it
+                        error="No se pudo importar el EPUB: ${it.message}"
+                    }
                 busy=false
             }
         }
@@ -153,7 +135,7 @@ fun ConstitutionScreen() {
                         backup.delete()
                     }
                 }.onSuccess{
-                    documentLoaded=true;page=0;reloaded++
+                    documentLoaded=true;page=0;reloaded++;epubMode=false
                     prefs.edit().putInt("page",0).apply()
                     error=""
                 }.onFailure{error="No se pudo importar el PDF: ${it.message}"}
@@ -167,6 +149,7 @@ fun ConstitutionScreen() {
             withContext(Dispatchers.IO){
                 ParcelFileDescriptor.open(file,ParcelFileDescriptor.MODE_READ_ONLY).use{fd->
                     PdfRenderer(fd).use{renderer->
+                        require(renderer.pageCount>0){"PDF sin páginas"}
                         val index=page.coerceIn(0,renderer.pageCount-1)
                         val pageCount=renderer.pageCount
                         renderer.openPage(index).use{pdfPage->
@@ -186,6 +169,7 @@ fun ConstitutionScreen() {
         }
         result.onSuccess{
             pages=it.first
+            page=page.coerceIn(0,pages-1)
             // Compose puede seguir dibujando el bitmap anterior durante la recomposición.
             // No reciclarlo aquí: el GC lo libera cuando deje de estar referenciado.
             image=it.second

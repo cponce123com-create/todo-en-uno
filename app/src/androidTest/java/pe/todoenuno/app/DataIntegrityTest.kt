@@ -12,6 +12,17 @@ import org.junit.runner.RunWith
 import pe.todoenuno.personal.NoteStore
 import pe.todoenuno.personal.QuickNote
 import pe.todoenuno.readers.SimpleEpubReader
+import pe.todoenuno.readers.EpubImporter
+import pe.todoenuno.documents.PhotoPdfComposer
+import pe.todoenuno.documents.PhotoGrid
+import pe.todoenuno.documents.PhotoLayout
+import android.graphics.Bitmap
+import android.graphics.pdf.PdfRenderer
+import android.os.ParcelFileDescriptor
+import android.net.Uri
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
 
 @RunWith(AndroidJUnit4::class)
 class DataIntegrityTest {
@@ -71,4 +82,58 @@ class DataIntegrityTest {
     @Test fun oversizedBookIsRejected() = isolated { dir,_ ->
         assertTrue(runCatching{SimpleEpubReader.parse(epub(dir,"Texto",401))}.isFailure)
     }
+    @Test fun invalidEpubImportPreservesExistingBook() = isolated { dir,_ ->
+        val target=epub(dir,"Mi libro anterior")
+        val previous=target.readBytes()
+        assertTrue(runCatching{EpubImporter.importBook(ByteArrayInputStream("invalid".toByteArray()),target)}.isFailure)
+        assertArrayEquals(previous,target.readBytes())
+        assertEquals("Mi libro anterior",SimpleEpubReader.parse(target).chapters.single().text)
+        assertFalse(dir.listFiles()!!.any{it.name.startsWith("epub-import-")})
+    }
+    @Test fun failedInputPreservesBookAndCleansTemporaryFile() = isolated { dir,_ ->
+        val target=epub(dir,"Anterior")
+        val previous=target.readBytes()
+        val failing=object:InputStream(){override fun read():Int=throw java.io.IOException("Interrupted input")}
+        assertTrue(runCatching{EpubImporter.importBook(failing,target)}.isFailure)
+        assertArrayEquals(previous,target.readBytes())
+        assertFalse(dir.listFiles()!!.any{it.name.startsWith("epub-import-")})
+    }
+    @Test fun validEpubImportReplacesBookAfterValidation() = isolated { dir,_ ->
+        val target=File(dir,"saved.epub")
+        epub(dir,"Anterior").copyTo(target)
+        val incoming=epub(dir,"Nuevo texto completo").readBytes()
+        val book=EpubImporter.importBook(ByteArrayInputStream(incoming),target)
+        assertEquals("Nuevo texto completo",book.chapters.single().text)
+        assertEquals(book,SimpleEpubReader.parse(target))
+    }
+    @Test fun realPhotographProducesReadablePdf() = isolated { dir,_ ->
+        val context=InstrumentationRegistry.getInstrumentation().targetContext
+        val image=File(dir,"photo.jpg")
+        val bitmap=Bitmap.createBitmap(240,180,Bitmap.Config.ARGB_8888)
+        bitmap.eraseColor(android.graphics.Color.BLUE)
+        try {image.outputStream().use{assertTrue(bitmap.compress(Bitmap.CompressFormat.JPEG,90,it))}}
+        finally {bitmap.recycle()}
+        val pdf=File(dir,"output.pdf")
+        pdf.outputStream().use { output ->
+            assertEquals(1,PhotoPdfComposer.compose(context,listOf(PhotoLayout(Uri.fromFile(image))),PhotoGrid.FULL,output))
+        }
+        ParcelFileDescriptor.open(pdf,ParcelFileDescriptor.MODE_READ_ONLY).use { descriptor ->
+            PdfRenderer(descriptor).use{renderer ->
+                assertEquals(1,renderer.pageCount)
+                renderer.openPage(0).use{page ->assertEquals(595,page.width);assertEquals(842,page.height)}
+            }
+        }
+    }
+    @Test fun invalidPhotoFailsWithoutWritingPdf() = isolated { dir,_ ->
+        val image=File(dir,"broken.jpg").apply{writeText("not an image")}
+        val output=ByteArrayOutputStream()
+        val result=runCatching {
+            PhotoPdfComposer.compose(InstrumentationRegistry.getInstrumentation().targetContext,
+                listOf(PhotoLayout(Uri.fromFile(image))),PhotoGrid.FULL,output)
+        }
+        assertTrue(result.isFailure)
+        assertTrue(result.exceptionOrNull() is IllegalArgumentException)
+        assertEquals(0,output.size())
+    }
+
 }
