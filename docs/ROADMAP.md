@@ -81,3 +81,31 @@
 - [ ] Pruebas instrumentadas de navegación y favoritos en emulador.
 - [ ] Refactor por dominios de feature:utilities; evaluar Hilt cuando haya dependencias complejas.
 - [ ] Auditoría de advertencias de Lint por herramientas y pruebas visuales de modo oscuro.
+
+## Sprint 0.7.0 — Implementación del boceto aprobado
+- [x] Inicio renovado, accesos rápidos reordenables por elección y categorías.
+- [x] Catálogo cuadrícula/lista (36+ herramientas).
+- [x] Calculadora científica con expresiones, DEG/RAD, historial local y pruebas.
+- [x] Tabla periódica de 118 elementos; búsqueda y clasificación offline.
+- [x] Fórmulas básicas de física con 12 cálculos interactivos.
+- [x] Triángulos notables, proporciones y calculadora.
+- [x] Regla centímetro/milímetro con calibración persistente.
+- [x] Linterna normal, SOS, estrobo lento y vela.
+- [x] Nivel visual en cámara con sensor y calibración.
+- [x] Generador etiquetas QR/PDF A4 (hasta 96 etiquetas).
+- [ ] Compilación completa, Lint y UI test verde del PR #9.
+- [ ] Verificar mediciones y cámara en teléfonos de diferentes fabricantes.
+
+## Sprint 0.8.0 — Perfeccionamiento
+- [ ] Diseño 3D ilustrado completo según referencia aprobada.
+- [ ] Mejorar calibración del nivel con cámara en diferentes orientaciones y prueba de alineación real.
+- [ ] Plantillas de etiquetas con diseños libremente editables y corte profesional.
+- [ ] Incorporar datos químicos adicionales verificados (masas, configuración).
+- [ ] Compartir etiquetas en PNG además de PDF.
+- [ ] Tests instrumentados de exportación y estado en dispositivos Android 8 a 15.
+
+## Sprint 0.9.0 — Auditoría y producción
+- [ ] Cobertura por módulo, pruebas de instrumentación, contraste y TalkBack.
+- [ ] Optimizar arranque y consumo de memoria de las 38 herramientas.
+- [ ] Configuración release firmada, licencias de terceros y preparación para Play Store.
+- [ ] Pruebas de regresión de linterna, cámara y audio en segundo plano.
