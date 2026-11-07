@@ -55,6 +55,7 @@ fun ConstitutionScreen() {
     var epubBook by remember { mutableStateOf<EpubBook?>(null) }
     var epubChapter by remember { mutableIntStateOf(0) }
     var epubFont by remember { mutableStateOf(18f) }
+    var epubSearch by remember { mutableStateOf("") }
     var epubMode by remember { mutableStateOf(false) }
     val prefs=remember(context){context.getSharedPreferences("constitution_reader",0)}
     var page by remember{mutableIntStateOf(prefs.getInt("page",0))}
@@ -91,7 +92,7 @@ fun ConstitutionScreen() {
                                         output.write(buffer,0,count)
                                     }
                                 }
-                            } ?: error("No se pudo abrir el EPUB")
+                            } ?: throw IllegalStateException("No se pudo abrir el EPUB")
                             val parsed=SimpleEpubReader.parse(temp)
                             val backup=File(epubFile.parentFile,"constitution-epub.previous")
                             if(epubFile.exists()) {
@@ -134,7 +135,7 @@ fun ConstitutionScreen() {
                                     out.write(buf,0,n)
                                 }
                             }
-                        }?:error("No se pudo abrir el PDF")
+                        }?:throw IllegalStateException("No se pudo abrir el PDF")
                         ParcelFileDescriptor.open(tmp,ParcelFileDescriptor.MODE_READ_ONLY).use {fd->
                             PdfRenderer(fd).use {require(it.pageCount>0)}
                         }
@@ -217,6 +218,8 @@ fun ConstitutionScreen() {
         if(epubMode && epubBook!=null) {
             val book=epubBook!!
             Text(book.title,style=MaterialTheme.typography.titleMedium)
+            OutlinedTextField(value=epubSearch,onValueChange={epubSearch=it.take(100)},label={Text("Buscar en el texto")},modifier=Modifier.fillMaxWidth(),singleLine=true)
+            if(epubSearch.isNotBlank()) Text("Coincidencias en esta sección: "+Regex(Regex.escape(epubSearch),RegexOption.IGNORE_CASE).findAll(book.chapters[epubChapter].text).count())
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
                 Button(onClick={epubChapter=(epubChapter-1).coerceAtLeast(0)},enabled=epubChapter>0){Text("‹")}
                 Text("Sección ${epubChapter+1}/${book.chapters.size}")
