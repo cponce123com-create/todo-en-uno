@@ -7,7 +7,7 @@
 - [x] Calculadora, conversor de unidades, linterna, cronómetro, temporizador y reloj mundial.
 - [x] Favoritos locales, búsqueda y temas de sistema.
 - [x] GitHub Actions: pruebas unitarias y APK debug.
-- [ ] Confirmar compilación real en CI y corregir cualquier fallo.
+- [x] Confirmar compilación y pruebas en GitHub Actions (7 de noviembre de 2026).
 - [ ] Probar en dispositivos Android físicos.
 
 ## 0.2.0: productividad

@@ -55,7 +55,10 @@ fun CountdownScreen() {
         Text(shown, fontSize = 54.sp, modifier = Modifier.padding(vertical = 25.dp))
         OutlinedTextField(
             value = minutes,
-            onValueChange = { minutes = it.filter(Char::isDigit).take(3) },
+            onValueChange = { value ->
+                minutes = value.filter(Char::isDigit).take(3)
+                remaining = (minutes.toLongOrNull() ?: 0L).coerceIn(0L, 999L) * 60_000L
+            },
             label = { Text("Minutos") },
             singleLine = true,
             enabled = !running,
