@@ -8,6 +8,7 @@ import android.os.ParcelFileDescriptor
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -152,7 +153,7 @@ fun ConstitutionScreen() {
                     Text("Ir")
                 }
             }
-            androidx.compose.foundation.Box(Modifier.fillMaxWidth().weight(1f)){
+            Box(Modifier.fillMaxWidth().weight(1f)){
                 val bmp=image
                 if(bmp!=null && !bmp.isRecycled)
                     Image(bmp.asImageBitmap(),contentDescription="Página ${page+1} de la Constitución",
