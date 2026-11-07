@@ -5,11 +5,19 @@ import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
+import android.media.AudioManager
+import android.media.ToneGenerator
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.Alignment
@@ -28,10 +36,17 @@ fun ParanormalScreen() {
     val sensor=remember(manager){manager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD)}
     var field by remember { mutableStateOf<Float?>(null) }
     var boardLetter by remember { mutableStateOf("INICIO") }
+    var pointerPosition by remember { mutableStateOf(Offset.Zero) }
     var boardHistory by remember { mutableStateOf("") }
     var lamp by remember { mutableStateOf("APAGADA") }
     var light by remember { mutableIntStateOf(0) }
     var spiritText by remember { mutableStateOf("Silencio") }
+    var soundEnabled by remember { mutableStateOf(false) }
+    val tone=remember { runCatching { ToneGenerator(AudioManager.STREAM_MUSIC,45) }.getOrNull() }
+    DisposableEffect(tone) { onDispose { tone?.release() } }
+    fun beep() {
+        if(soundEnabled) runCatching { tone?.startTone(ToneGenerator.TONE_PROP_BEEP,120) }
+    }
     DisposableEffect(manager,sensor) {
         val listener=object:SensorEventListener {
             override fun onAccuracyChanged(sensor:Sensor?,accuracy:Int) {}
@@ -51,20 +66,44 @@ fun ParanormalScreen() {
         Text("Campo magnético físico: "+(field?.let { "%.1f µT".format(it) } ?: "Sensor no disponible"))
         Text("La lectura es del magnetómetro del móvil y puede variar por metales o aparatos eléctricos.")
         HorizontalDivider()
+        Row(verticalAlignment=Alignment.CenterVertically) {
+            Checkbox(checked=soundEnabled,onCheckedChange={soundEnabled=it})
+            Text("Activar pitidos breves (volumen multimedia)")
+        }
+        Text("Sonidos opcionales y simulados; sin grabación de micrófono ni destellos.",style=MaterialTheme.typography.bodySmall)
         Text("REM-POD virtual",style=MaterialTheme.typography.titleMedium)
         Text("Indicador luminoso simulado: nivel $light de 4")
-        Button(onClick={light=Random.nextInt(0,5)}){Text("Generar respuesta luminosa simulada")}
+        Button(onClick={light=Random.nextInt(0,5);beep()}){Text("Generar respuesta luminosa simulada")}
         HorizontalDivider()
         Text("Spirit box simulada",style=MaterialTheme.typography.titleMedium)
         Text(spiritText)
         Button(onClick={
             spiritText=listOf("…ruido blanco…","¿Hola?","…interferencia…","Aquí","…silencio…","Tal vez").random()
+            beep()
         }){Text("Simular barrido de voces")}
         Text("Las frases se generan aleatoriamente; no provienen de una comunicación real.",style=MaterialTheme.typography.bodySmall)
         HorizontalDivider()
         Text("Tablero Ouija virtual",style=MaterialTheme.typography.titleMedium)
         Text("Juego recreativo: selecciona letras o genera movimientos aleatorios. No detecta espíritus.")
         Text("Indicador: $boardLetter",style=MaterialTheme.typography.titleLarge)
+        Box(Modifier.fillMaxWidth().height(72.dp)
+            .background(MaterialTheme.colorScheme.secondaryContainer,RoundedCornerShape(12.dp))
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                        awaitFirstDown(requireUnconsumed=false)
+                        do {
+                            val event=awaitPointerEvent(PointerEventPass.Main)
+                            val active=event.changes.filter { it.pressed }
+                            if(active.isNotEmpty()) {
+                                val x=active.map { it.position.x }.average().toFloat()
+                                val y=active.map { it.position.y }.average().toFloat()
+                                pointerPosition=Offset(x,y)
+                            }
+                        } while(event.changes.any { it.pressed })
+                }
+            },contentAlignment=Alignment.Center) {
+            Text("Arrastra el indicador: ${pointerPosition.x.toInt()}, ${pointerPosition.y.toInt()}")
+        }
         listOf("ABCDEFGHI","JKLMNOPQR","STUVWXYZ").forEach { letters ->
             Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(2.dp)) {
                 letters.forEach { letter ->
@@ -77,9 +116,9 @@ fun ParanormalScreen() {
             }
         }
         Row(horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            Button(onClick={boardLetter="SÍ";boardHistory+=" SÍ"}) { Text("SÍ") }
-            Button(onClick={boardLetter="NO";boardHistory+=" NO"}) { Text("NO") }
-            Button(onClick={boardLetter="ADIÓS";boardHistory+=" ADIÓS"}) { Text("ADIÓS") }
+            Button(onClick={boardLetter="SÍ";boardHistory=(boardHistory+" SÍ").takeLast(100)}) { Text("SÍ") }
+            Button(onClick={boardLetter="NO";boardHistory=(boardHistory+" NO").takeLast(100)}) { Text("NO") }
+            Button(onClick={boardLetter="ADIÓS";boardHistory=(boardHistory+" ADIÓS").takeLast(100)}) { Text("ADIÓS") }
         }
         Button(onClick={
             val letter=('A'..'Z').random()
@@ -100,5 +139,6 @@ fun ParanormalScreen() {
             contentAlignment=Alignment.Center
         ) { Text("Luz $lamp",color=Color.White) }
         Text("Las luces son estáticas, sin destellos.",style=MaterialTheme.typography.bodySmall)
+        Text("El indicador sigue el punto medio de los dedos que tocan el área; es un juego simulado y no detecta entidades.",style=MaterialTheme.typography.bodySmall)
     }
 }

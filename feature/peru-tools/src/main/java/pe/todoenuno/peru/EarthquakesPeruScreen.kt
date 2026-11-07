@@ -92,8 +92,17 @@ object IgpService {
         }
         return try {
             require(conn.responseCode==200){"Servidor IGP no disponible."}
-            val raw=conn.inputStream.bufferedReader(Charsets.UTF_8).use{it.readText()}
-            require(raw.length<=200000){"Respuesta demasiado grande."}
+            val raw=conn.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
+                val result=StringBuilder()
+                val buffer=CharArray(4096)
+                while(true) {
+                    val count=reader.read(buffer)
+                    if(count<0)break
+                    require(result.length+count<=200000){"Respuesta demasiado grande."}
+                    result.append(buffer,0,count)
+                }
+                result.toString()
+            }
             decode(raw)
         }finally{conn.disconnect()}
     }

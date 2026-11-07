@@ -88,10 +88,10 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
     }
     BoxWithConstraints(Modifier.fillMaxSize()) {
     val compact = maxHeight < 700.dp
-    val keyHeight = ((maxHeight - if(compact) 230.dp else 300.dp) / 8).coerceIn(36.dp, 56.dp)
+    val tight = maxHeight < 560.dp
     Column(
         Modifier.fillMaxSize().padding(if(compact) 6.dp else 12.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(if(tight) 3.dp else 8.dp)
     ) {
         Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween,
             verticalAlignment=Alignment.CenterVertically) {
@@ -108,7 +108,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                 modifier=Modifier.fillMaxWidth().padding(if(compact) 8.dp else 18.dp),
                 verticalArrangement=Arrangement.spacedBy(6.dp)
             ) {
-                Text("Expresión",style=MaterialTheme.typography.labelMedium,
+                if(!tight) Text("Expresión",style=MaterialTheme.typography.labelMedium,
                     color=MaterialTheme.colorScheme.onSurfaceVariant)
                 OutlinedTextField(
                     value=expression,
@@ -119,7 +119,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                     keyboardOptions=KeyboardOptions.Default,
                 )
                 Text(lastResult,modifier=Modifier.fillMaxWidth(),
-                    textAlign=TextAlign.End,fontSize=if(compact) 25.sp else 31.sp,
+                    textAlign=TextAlign.End,fontSize=if(tight) 19.sp else if(compact) 25.sp else 31.sp,
                     fontWeight=FontWeight.Bold,
                     color=MaterialTheme.colorScheme.primary)
                 error?.let {
@@ -149,11 +149,12 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
             listOf("1","2","3","−","±"),
             listOf("0",".","exp","+", "=")
         )
+        Column(Modifier.fillMaxWidth().weight(1f),verticalArrangement=Arrangement.spacedBy(if(tight) 2.dp else 5.dp)) {
         keys.forEach { row ->
-            Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
+            Row(Modifier.fillMaxWidth().weight(1f),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
                 row.forEach { key ->
                     val operator=key in setOf("+","−","×","÷","=")
-                    val modifier=Modifier.weight(1f).height(keyHeight)
+                    val modifier=Modifier.weight(1f).fillMaxSize()
                     Button(
                         onClick={
                             when(key) {
@@ -186,6 +187,7 @@ fun ScientificCalculatorScreen(onBasicMode: () -> Unit) {
                     }
                 }
             }
+        }
         }
         if(!compact) Text("Operaciones locales. Usa funciones como sin(45), sqrt(9), 5!, 2^3 y DEG/RAD.",
             style=MaterialTheme.typography.bodySmall,
