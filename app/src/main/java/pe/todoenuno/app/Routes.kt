@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 
 /** Destinos tipados. Cada herramienta admite sus propias subpantallas. */
 @Serializable object HomeRoute
+@Serializable object CategoriesRoute
 @Serializable object AllToolsRoute
 @Serializable object FavoritesRoute
 @Serializable object SettingsRoute
