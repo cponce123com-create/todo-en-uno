@@ -79,4 +79,4 @@ Consulta [ROADMAP](docs/ROADMAP.md) para las funciones pendientes y el plan de p
 - EPUB: los documentos que exceden 65 000 caracteres por sección o 400 secciones se rechazan explícitamente, sin truncar texto.
 - Temporizador: conceder permiso durante una cuenta programa el aviso pendiente.
 - Grabaciones: exportación fuera del hilo de interfaz y preparación asíncrona del reproductor.
-- Sismos: orden cronológico antes de limitar resultados. La fuente actual de último sismo y la acumulación local no garantizan cinco eventos en la primera consulta. La integración de una fuente histórica oficial permanece pendiente.
+- Sismos: orden cronológico antes de limitar resultados. Se consulta la capa histórica oficial Sismos Reportados del IGP, ordenada por fechaevento descendente, con hasta 30 reportes por consulta y 100 eventos guardados localmente.

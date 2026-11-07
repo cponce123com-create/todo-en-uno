@@ -49,8 +49,8 @@ data class QuakeReport(
 
 object IgpService {
     const val PAGE="https://ultimosismo.igp.gob.pe/productos/reportes-sismicos"
-    // Fuente geográfica pública del IGP: servicio ArcGIS UltimoSismo, capa 0.
-    const val ENDPOINT="https://ide.igp.gob.pe/arcgis/rest/services/monitoreocensis/UltimoSismo/MapServer/0/query?where=1%3D1&outFields=%2A&returnGeometry=false&f=json"
+    // Fuente histórica pública IGP, capa Sismos Reportados. Orden del servidor antes de paginar.
+    const val ENDPOINT="https://ide.igp.gob.pe/arcgis/rest/services/monitoreocensis/SismosReportados/MapServer/0/query?where=fechaevento%20IS%20NOT%20NULL&outFields=code,fechaevento,hora,magnitud,prof,ref,lat,lon&returnGeometry=false&orderByFields=fechaevento%20DESC&resultRecordCount=30&f=json"
 
     fun decode(json:String):List<QuakeReport> {
         val root=JSONObject(json)
@@ -58,14 +58,20 @@ object IgpService {
         val array=root.optJSONArray("features")?:return emptyList()
         return newestFirst((0 until array.length()).mapNotNull {idx->
             val attrs=array.optJSONObject(idx)?.optJSONObject("attributes")?:return@mapNotNull null
+            val historical=attrs.has("fechaevento")
+            val instant=attrs.optLong("fechaevento",0L)
+            if(historical && instant<=0L)return@mapNotNull null
+            fun formatted(pattern:String)=SimpleDateFormat(pattern,Locale("es","PE")).apply {
+                timeZone=java.util.TimeZone.getTimeZone("America/Lima")
+            }.format(Date(instant))
             QuakeReport(
                 attrs.optDouble("magnitud").takeIf{it.isFinite()},
-                attrs.optDouble("profundidad").takeIf{it.isFinite()},
-                attrs.optString("fecha_local"),
-                attrs.optString("hora_local"),
-                attrs.optString("referencia","Sin referencia"),
-                attrs.optDouble("latitud").takeIf{it.isFinite()},
-                attrs.optDouble("longitud").takeIf{it.isFinite()}
+                attrs.optDouble(if(historical)"prof" else "profundidad").takeIf{it.isFinite()},
+                if(historical)formatted("dd/MM/yyyy") else attrs.optString("fecha_local"),
+                if(historical)formatted("HH:mm:ss") else attrs.optString("hora_local"),
+                attrs.optString(if(historical)"ref" else "referencia","Sin referencia"),
+                attrs.optDouble(if(historical)"lat" else "latitud").takeIf{it.isFinite()},
+                attrs.optDouble(if(historical)"lon" else "longitud").takeIf{it.isFinite()}
             )
         }).take(30)
     }
@@ -179,7 +185,7 @@ fun EarthquakesPeruScreen() {
             style=MaterialTheme.typography.bodySmall)
         if(reports.isEmpty() && !loading)Text("Pulsa actualizar para consultar el evento disponible.")
         Text("Últimos ${minOf(5,reports.size)} reportes guardados")
-        if(reports.size<5)Text("La fuente consultada publica el último sismo. El historial local irá acumulando los eventos que consultes; aún no hay cinco guardados.",
+        if(reports.size<5)Text("Aún hay menos de cinco reportes guardados. Actualiza para consultar los últimos eventos disponibles del IGP.",
             style=MaterialTheme.typography.bodySmall)
         (if(showAll)reports else reports.take(5)).forEach {event->
             Card(Modifier.fillMaxWidth()){
@@ -202,7 +208,7 @@ fun EarthquakesPeruScreen() {
         },modifier=Modifier.fillMaxWidth()) {
             Text("Ver reportes y antecedentes en portal oficial")
         }
-        Text("El historial local conserva eventos consultados previamente (máximo 100), pero no reemplaza una fuente histórica oficial. La app no crea ni modifica magnitudes.",
+        Text("La consulta trae hasta 30 reportes recientes del servicio histórico oficial. El historial local conserva hasta 100 eventos consultados. La app no crea ni modifica magnitudes.",
             style=MaterialTheme.typography.bodySmall,
             color=MaterialTheme.colorScheme.onSurfaceVariant)
     }
