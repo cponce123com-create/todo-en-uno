@@ -5,7 +5,7 @@
 | Módulo | Responsabilidad |
 |---|---|
 | `:app` | Navegación Compose, tarjetas, registro de rutas, estado de inicio y UI tests |
-| `:core:catalog` | Metadatos de 33 herramientas y filtros puros, sin dependencia de Android |
+| `:core:catalog` | Metadatos del catálogo de herramientas y filtros puros, sin dependencia de Android |
 | `:feature:math-tools` | Cálculo científico, conversores, finanzas y cálculos informativos de edad/IMC |
 | `:feature:sensor-tools` | Linterna, brújula, nivel, campo magnético y regla de pantalla |
 | `:feature:location-tools` | GPS, distancia geodésica, Sol/Luna y reloj mundial |

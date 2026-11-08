@@ -146,11 +146,11 @@ internal fun GameLoop(ui:GameUi,interval:Long,onTick:()->Unit) {
 }
 
 @Composable
-internal fun GameHeader(title:String,score:Int,ui:GameUi,onRestart:()->Unit) {
+internal fun GameHeader(title:String,score:Int,ui:GameUi,metric:String="Puntos",showRecord:Boolean=true,onRestart:()->Unit) {
     Text(title,style=MaterialTheme.typography.titleLarge,fontWeight=FontWeight.Bold)
     Row(Modifier.fillMaxWidth(),verticalAlignment=Alignment.CenterVertically,
         horizontalArrangement=Arrangement.SpaceBetween) {
-        Column {Text("Puntos $score",fontWeight=FontWeight.Bold);Text("Récord ${ui.best}",style=MaterialTheme.typography.labelSmall)}
+        Column {Text("$metric $score",fontWeight=FontWeight.Bold);if(showRecord)Text("Récord ${ui.best}",style=MaterialTheme.typography.labelSmall)}
         TextButton(enabled=!ui.ended,onClick={if(ui.paused)ui.play() else ui.paused=true}) {
             Text(if(!ui.started)"Jugar" else if(ui.paused)"Continuar" else "Pausa")
         }

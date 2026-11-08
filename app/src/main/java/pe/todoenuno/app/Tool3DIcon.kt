@@ -300,6 +300,19 @@ private fun renderGlyph(c:NativeCanvas,id:String){
             line(c,50f,28f,50f,72f,mint,3f)
             circle(c,50f,50f,5f,coral)
         }
+        "2048", "fifteen" -> {
+            rr(c,25f,25f,75f,75f,7f,navy)
+            rr(c,29f,29f,49f,49f,3f,gold)
+            rr(c,51f,29f,71f,49f,3f,coral)
+            rr(c,29f,51f,49f,71f,3f,mint)
+            text(c,if(id=="2048")"2" else "1",39f,44f,14f,navy)
+            text(c,if(id=="2048")"4" else "2",61f,44f,14f,navy)
+        }
+        "breakout" -> {
+            for(row in 0..2)for(col in 0..3)rr(c,23f+col*14f,25f+row*10f,35f+col*14f,33f+row*10f,2f,if(row==0)coral else gold)
+            rr(c,36f,69f,66f,75f,3f,mint)
+            circle(c,53f,59f,5f,ivory)
+        }
         "snake" -> {
             rr(c,22f,38f,77f,64f,9f,0xFF266B37.toInt())
             for(i in 0..3)circle(c,30f+i*12f,50f,7f,mint)
