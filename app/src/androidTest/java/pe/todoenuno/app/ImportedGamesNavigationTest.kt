@@ -2,6 +2,7 @@ package pe.todoenuno.app
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.test.*
+import androidx.compose.ui.semantics.SemanticsActions
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import org.junit.Rule
@@ -32,7 +33,7 @@ class ImportedGamesNavigationTest {
         compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsNotEnabled()
         compose.onNodeWithText("Empezar").performClick()
         compose.mainClock.autoAdvance = false
-        compose.onNodeWithContentDescription("Breakout: lanzar bola").performClick()
+        compose.onNodeWithContentDescription("Breakout: lanzar bola").performSemanticsAction(SemanticsActions.OnClick)
         compose.mainClock.advanceTimeBy(100)
         compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsNotEnabled()
         compose.mainClock.autoAdvance = true
