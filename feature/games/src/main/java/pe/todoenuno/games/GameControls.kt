@@ -140,7 +140,7 @@ internal fun rememberGameUi(id:String,score:Int,ended:Boolean,lives:Int=0):GameU
 @Composable
 internal fun GameLoop(ui:GameUi,interval:Long,onTick:()->Unit) {
     val tick by rememberUpdatedState(onTick)
-    LaunchedEffect(ui.active,ui.epoch) {
+    LaunchedEffect(ui.active,ui.epoch,interval) {
         if(ui.active)while(isActive){delay(interval);tick()}
     }
 }
