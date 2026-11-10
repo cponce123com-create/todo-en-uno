@@ -91,10 +91,11 @@ private fun SnakeGameScreen() {
     val ui=rememberGameUi("snake",state.score,state.lost||state.won)
     GameLoop(ui,150L){state=SnakeEngine.step(state)}
     val turn by rememberUpdatedState<(Direction)->Unit>({state=SnakeEngine.turn(state,it)})
-    Column(Modifier.fillMaxSize().padding(12.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-        GameHeader("Snake · Come y crece",state.score,ui){state=SnakeEngine.start()}
-        Text("Desliza o usa las flechas. Evita las paredes y tu cuerpo.",style=MaterialTheme.typography.bodySmall)
-        Board(Modifier.fillMaxWidth().weight(1f),ui,state.won,{state=SnakeEngine.start()},
+    GameFrame("Snake",state.score,ui,{state=SnakeEngine.start()},
+        left={
+            DirectionPad(ui.active,"Snake"){turn(it)}
+        }, right={ Text("Evita las paredes y tu cuerpo.",style=MaterialTheme.typography.bodySmall) }) { boardModifier ->
+        Board(boardModifier,ui,state.won,{state=SnakeEngine.start()},
             Modifier.swipe(ui.active){turn(it)}) {
             val (cell,origin)=grid(SnakeEngine.WIDTH,SnakeEngine.HEIGHT)
             val food=origin+Offset((state.food.x+.5f)*cell,(state.food.y+.5f)*cell)
@@ -114,14 +115,6 @@ private fun SnakeGameScreen() {
                 }
             }
         }
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.Center) {
-            GameControl("↑","Snake: subir",ui.active){turn(Direction.UP)}
-        }
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            GameControl("←","Snake: izquierda",ui.active,Modifier.weight(1f)){turn(Direction.LEFT)}
-            GameControl("↓","Snake: bajar",ui.active,Modifier.weight(1f)){turn(Direction.DOWN)}
-            GameControl("→","Snake: derecha",ui.active,Modifier.weight(1f)){turn(Direction.RIGHT)}
-        }
     }
 }
 
@@ -131,10 +124,17 @@ private fun BlockGameScreen() {
     val ui=rememberGameUi("blocks",state.score,state.lost)
     GameLoop(ui,530L){state=BlockEngine.step(state)}
     val colors=remember{listOf(Cyan,Gold,Color(0xFFB99DFF),Color(0xFF6EE7A1),Coral,Color(0xFF73A8FF),Color(0xFFFFAC6A))}
-    Column(Modifier.fillMaxSize().padding(12.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-        GameHeader("Bloques · Completa las filas",state.score,ui){state=BlockEngine.start()}
-        Text("${state.cleared} filas · La sombra muestra dónde caerá la pieza.",style=MaterialTheme.typography.bodySmall)
-        Board(Modifier.fillMaxWidth().weight(1f),ui,onRestart={state=BlockEngine.start()}) {
+    GameFrame("Bloques",state.score,ui,{state=BlockEngine.start()},
+        left={
+            GameControl("←","Bloques: mover izquierda",ui.active,repeatMillis=85L){state=BlockEngine.shift(state,-1)}
+            GameControl("→","Bloques: mover derecha",ui.active,repeatMillis=85L){state=BlockEngine.shift(state,1)}
+            GameControl("↓","Bloques: bajar despacio",ui.active,repeatMillis=65L){state=BlockEngine.step(state)}
+        }, right={
+            GameControl("↻","Bloques: girar pieza",ui.active){state=BlockEngine.rotate(state)}
+            GameControl("⇓","Bloques: soltar pieza al fondo",ui.active){state=BlockEngine.drop(state)}
+            Text("${state.cleared} filas",style=MaterialTheme.typography.bodySmall)
+        }) { boardModifier ->
+        Board(boardModifier,ui,onRestart={state=BlockEngine.start()}) {
             val (cell,origin)=grid(BlockEngine.WIDTH,BlockEngine.HEIGHT)
             fun tile(p:GridPoint,color:Color,ghost:Boolean=false) {
                 if(p.x in 0 until BlockEngine.WIDTH && p.y in 0 until BlockEngine.HEIGHT) {
@@ -151,16 +151,6 @@ private fun BlockGameScreen() {
             BlockEngine.landing(state).forEach{tile(it,Color.White.copy(alpha=.35f),true)}
             BlockEngine.active(state).forEach{tile(it,colors[state.piece.type])}
         }
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(7.dp)) {
-            GameControl("←","Bloques: mover izquierda",ui.active,Modifier.weight(1f),85L){state=BlockEngine.shift(state,-1)}
-            GameControl("↻","Bloques: girar pieza",ui.active,Modifier.weight(1f)){state=BlockEngine.rotate(state)}
-            GameControl("→","Bloques: mover derecha",ui.active,Modifier.weight(1f),85L){state=BlockEngine.shift(state,1)}
-            GameControl("↓","Bloques: bajar despacio",ui.active,Modifier.weight(1f),65L){state=BlockEngine.step(state)}
-        }
-        GameControl("⇓ Soltar pieza","Bloques: soltar pieza al fondo",ui.active,Modifier.fillMaxWidth()){
-            state=BlockEngine.drop(state)
-        }
-        Text("Mantén ← → o ↓ para repetir. Toca ↻ para girar.",style=MaterialTheme.typography.bodySmall)
     }
 }
 
@@ -169,10 +159,15 @@ private fun ShooterGameScreen() {
     var state by remember{mutableStateOf(ArcadeEngine.start())}
     val ui=rememberGameUi("shooter",state.score,state.lost,state.lives)
     GameLoop(ui,100L){state=ArcadeEngine.step(state)}
-    Column(Modifier.fillMaxSize().padding(12.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-        GameHeader("Nave · Defiende el espacio",state.score,ui){state=ArcadeEngine.start()}
-        Text("Vidas ${"♥".repeat(state.lives)} · Mantén disparar y muévete a la vez.",style=MaterialTheme.typography.bodySmall)
-        Board(Modifier.fillMaxWidth().weight(1f),ui,onRestart={state=ArcadeEngine.start()}) {
+    GameFrame("Nave",state.score,ui,{state=ArcadeEngine.start()},
+        left={
+            GameControl("←","Nave: mover izquierda",ui.active,repeatMillis=65L){state=ArcadeEngine.move(state,-1)}
+            GameControl("→","Nave: mover derecha",ui.active,repeatMillis=65L){state=ArcadeEngine.move(state,1)}
+        }, right={
+            GameControl("● Fuego","Nave: disparar",ui.active,repeatMillis=140L){state=ArcadeEngine.shoot(state)}
+            Text("Vidas ${state.lives}",style=MaterialTheme.typography.bodySmall)
+        }) { boardModifier ->
+        Board(boardModifier,ui,onRestart={state=ArcadeEngine.start()}) {
             val cell=minOf(size.width/ArcadeEngine.WIDTH,size.height/ArcadeEngine.HEIGHT)
             val origin=Offset((size.width-cell*ArcadeEngine.WIDTH)/2,(size.height-cell*ArcadeEngine.HEIGHT)/2)
             repeat(34) { i ->
@@ -209,11 +204,5 @@ private fun ShooterGameScreen() {
                 }
             }
         }
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            GameControl("←","Nave: mover izquierda",ui.active,Modifier.weight(1f),65L){state=ArcadeEngine.move(state,-1)}
-            GameControl("● Fuego","Nave: disparar",ui.active,Modifier.weight(1.6f),140L){state=ArcadeEngine.shoot(state)}
-            GameControl("→","Nave: mover derecha",ui.active,Modifier.weight(1f),65L){state=ArcadeEngine.move(state,1)}
-        }
-        Text("Todos los juegos funcionan sin conexión.",style=MaterialTheme.typography.bodySmall)
     }
 }

@@ -1,5 +1,10 @@
 package pe.todoenuno.app
 
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
+import android.content.pm.ActivityInfo
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.foundation.background
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
@@ -278,6 +283,16 @@ private fun CatalogScreen(mode: CatalogMode, model: HomeViewModel, open: (String
 @Composable
 private fun ToolDetail(id: String, onBack: () -> Unit, onInfo: () -> Unit) {
     val tool = ToolCatalog.find(id)
+    val context = LocalContext.current
+    val activity = remember(context) { context.findActivity() }
+    val isGame = ToolRouting.domain(id) == ToolDomain.GAMES
+    DisposableEffect(activity, isGame) {
+        val previous = activity?.requestedOrientation
+        if (isGame) activity?.requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        onDispose {
+            if (isGame && previous != null) activity?.requestedOrientation = previous
+        }
+    }
     Column(Modifier.fillMaxSize()) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 8.dp),
@@ -442,4 +457,10 @@ private fun SettingsPanel() {
         Text("La mayoría de herramientas funciona sin conexión. Las divisas requieren Internet para actualizarse.")
         Text("Desarrollado con Kotlin y Jetpack Compose.", color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
+}
+
+private tailrec fun Context.findActivity(): Activity? = when (this) {
+    is Activity -> this
+    is ContextWrapper -> if (baseContext === this) null else baseContext.findActivity()
+    else -> null
 }

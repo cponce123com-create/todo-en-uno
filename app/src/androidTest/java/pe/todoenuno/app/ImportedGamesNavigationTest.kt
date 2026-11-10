@@ -31,8 +31,11 @@ class ImportedGamesNavigationTest {
         compose.setContent{MaterialTheme{GamesScreen("breakout")}}
         compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsNotEnabled()
         compose.onNodeWithText("Empezar").performClick()
+        compose.mainClock.autoAdvance = false
         compose.onNodeWithContentDescription("Breakout: lanzar bola").performClick()
+        compose.mainClock.advanceTimeByFrame()
         compose.onNodeWithText("En juego").assertExists()
+        compose.mainClock.autoAdvance = true
         compose.onNodeWithText("Pausa").performClick()
         compose.onNodeWithContentDescription("Breakout: mover pala izquierda").assertIsNotEnabled()
     }
