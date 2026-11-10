@@ -7,6 +7,8 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.focusable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +23,7 @@ import androidx.compose.ui.input.key.*
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -176,5 +179,57 @@ internal fun GameOverlay(ui:GameUi,won:Boolean=false,onRestart:()->Unit) {
                 }
             }
         }
+    }
+}
+
+/** Keeps the board between thumb controls in landscape and retains a portrait fallback. */
+@Composable
+internal fun GameFrame(
+    title:String, score:Int, ui:GameUi, onRestart:()->Unit,
+    metric:String="Puntos", showRecord:Boolean=true,
+    left:@Composable ColumnScope.()->Unit, right:@Composable ColumnScope.()->Unit,
+    board:@Composable (Modifier)->Unit
+) {
+    BoxWithConstraints(Modifier.fillMaxSize().padding(6.dp)) {
+        if (maxWidth > maxHeight && maxWidth >= 500.dp) {
+            Row(Modifier.fillMaxSize(),horizontalArrangement=Arrangement.spacedBy(6.dp),
+                verticalAlignment=Alignment.CenterVertically) {
+                Column(Modifier.width(200.dp).fillMaxHeight().verticalScroll(rememberScrollState()),
+                    verticalArrangement=Arrangement.Center,horizontalAlignment=Alignment.CenterHorizontally,content=left)
+                board(Modifier.weight(1f).fillMaxHeight().testTag("game_board"))
+                Column(Modifier.width(142.dp).fillMaxHeight().verticalScroll(rememberScrollState()),
+                    horizontalAlignment=Alignment.CenterHorizontally,verticalArrangement=Arrangement.spacedBy(2.dp)) {
+                    right()
+                    Text(title,style=MaterialTheme.typography.titleMedium,fontWeight=FontWeight.Bold)
+                    Text("$metric $score" + if(showRecord) " · Récord ${ui.best}" else "",style=MaterialTheme.typography.labelSmall)
+                    TextButton(enabled=!ui.ended,onClick={if(ui.paused)ui.play() else ui.paused=true}) {
+                        Text(if(!ui.started)"Jugar" else if(ui.paused)"Continuar" else "Pausa")
+                    }
+                    TextButton(onClick={ui.restart(onRestart)}){Text("Reiniciar")}
+                    TextButton(onClick={ui.sound=!ui.sound}){Text("Sonido ${if(ui.sound) "sí" else "no"}")}
+                    TextButton(onClick={ui.effects=!ui.effects}){Text("Efectos ${if(ui.effects) "sí" else "no"}")}
+                }
+            }
+        } else {
+            Column(Modifier.fillMaxSize(),verticalArrangement=Arrangement.spacedBy(4.dp)) {
+                GameHeader(title,score,ui,metric=metric,showRecord=showRecord,onRestart=onRestart)
+                board(Modifier.fillMaxWidth().weight(1f).testTag("game_board"))
+                Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceEvenly,
+                    verticalAlignment=Alignment.CenterVertically) {
+                    Column(horizontalAlignment=Alignment.CenterHorizontally,content=left)
+                    Column(horizontalAlignment=Alignment.CenterHorizontally,content=right)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+internal fun DirectionPad(enabled:Boolean,game:String,onDirection:(Direction)->Unit) {
+    GameControl("↑","$game: subir",enabled){onDirection(Direction.UP)}
+    Row(horizontalArrangement=Arrangement.spacedBy(2.dp)) {
+        GameControl("←","$game: izquierda",enabled){onDirection(Direction.LEFT)}
+        GameControl("↓","$game: bajar",enabled){onDirection(Direction.DOWN)}
+        GameControl("→","$game: derecha",enabled){onDirection(Direction.RIGHT)}
     }
 }

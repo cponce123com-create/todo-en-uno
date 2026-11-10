@@ -61,10 +61,13 @@ internal fun TileGameScreen() {
         if(next!=state){previous=state;state=next}
     }
     val swipeAction by rememberUpdatedState<(Direction)->Unit>({move(it)})
-    Column(Modifier.fillMaxSize().padding(12.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-        GameHeader("2048 · Une los números",state.score,ui,onRestart={reset()})
-        Text("Desliza o toca las flechas. Une números iguales hasta llegar a 2048.",style=MaterialTheme.typography.bodySmall)
-        Box(Modifier.fillMaxWidth().weight(1f).swipe(ui.active){swipeAction(it)},contentAlignment=Alignment.Center) {
+    GameFrame("2048",state.score,ui,::reset,
+        left={ DirectionPad(ui.active,"2048"){move(it)} },
+        right={
+            TextButton(enabled=previous!=null,onClick={previous?.let{state=it;previous=null;ui.play()}}){Text("Deshacer")}
+            Credits("2048","2048 · Gabriele Cirulli · MIT")
+        }) { boardModifier ->
+        Box(boardModifier.swipe(ui.active){swipeAction(it)},contentAlignment=Alignment.Center) {
             SquareBoard(Modifier.fillMaxSize()) {
                 repeat(4) { row ->
                     Row(Modifier.fillMaxWidth().weight(1f),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
@@ -89,16 +92,6 @@ internal fun TileGameScreen() {
             }
             GameOverlay(ui,state.won){reset()}
         }
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(6.dp)) {
-            listOf("←" to Direction.LEFT,"↑" to Direction.UP,"↓" to Direction.DOWN,"→" to Direction.RIGHT).forEach{(symbol,direction)->
-                GameControl(symbol,"2048: ${when(direction){Direction.LEFT->"izquierda";Direction.RIGHT->"derecha";Direction.UP->"arriba";Direction.DOWN->"abajo"}}",
-                    ui.active,Modifier.weight(1f)){move(direction)}
-            }
-        }
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
-            TextButton(enabled=previous!=null,onClick={previous?.let{state=it;previous=null;ui.play()}}){Text("Deshacer")}
-            Credits("2048","2048 · Gabriele Cirulli · MIT")
-        }
     }
 }
 
@@ -111,10 +104,13 @@ internal fun FifteenGameScreen() {
     val ui=rememberGameUi("fifteen",if(state.won)10000/state.moves.coerceAtLeast(1) else 0,state.won)
     LaunchedEffect(state){prefs.edit().putString("fifteen",FifteenEngine.encode(state)).apply()}
     fun reset(){state=FifteenEngine.start();previous=null}
-    Column(Modifier.fillMaxSize().padding(12.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-        GameHeader("Fifteen · Ordena del 1 al 15",state.moves,ui,metric="Movimientos",showRecord=false,onRestart={reset()})
-        Text("Toca una ficha en la fila o columna del hueco para deslizarla. Las fichas disponibles están resaltadas.",style=MaterialTheme.typography.bodySmall)
-        Box(Modifier.fillMaxWidth().weight(1f),contentAlignment=Alignment.Center) {
+    GameFrame("Puzzle 15",state.moves,ui,::reset,metric="Movimientos",showRecord=false,
+        left={ Text("Toca una ficha para moverla",style=MaterialTheme.typography.bodySmall) },
+        right={
+            TextButton(enabled=previous!=null,onClick={previous?.let{state=it;previous=null;ui.play()}}){Text("Deshacer")}
+            Credits("fifteen","Fifteen · Simon Tatham y colaboradores · MIT")
+        }) { boardModifier ->
+        Box(boardModifier,contentAlignment=Alignment.Center) {
             SquareBoard(Modifier.fillMaxSize()) {
                 repeat(4) { row ->
                     Row(Modifier.fillMaxWidth().weight(1f),horizontalArrangement=Arrangement.spacedBy(5.dp)) {
@@ -133,10 +129,6 @@ internal fun FifteenGameScreen() {
             }
             GameOverlay(ui,true){reset()}
         }
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.SpaceBetween) {
-            TextButton(enabled=previous!=null,onClick={previous?.let{state=it;previous=null;ui.play()}}){Text("Deshacer")}
-            Credits("fifteen","Fifteen · Simon Tatham y colaboradores · MIT")
-        }
     }
 }
 
@@ -154,10 +146,16 @@ internal fun BreakoutGameScreen() {
         }
     }
     val movePaddle by rememberUpdatedState<(Float)->Unit>({state=BreakoutEngine.paddle(state,it)})
-    Column(Modifier.fillMaxSize().padding(12.dp),verticalArrangement=Arrangement.spacedBy(6.dp)) {
-        GameHeader("Breakout · Rompe los bloques",state.score,ui,onRestart={state=BreakoutEngine.start()})
-        Text("Vidas ${state.lives} · Arrastra la pala o mantén las flechas. Toca Lanzar para sacar la bola.",style=MaterialTheme.typography.bodySmall)
-        Box(Modifier.fillMaxWidth().weight(1f).background(Color(0xFF0C1729),RoundedCornerShape(18.dp))
+    GameFrame("Breakout",state.score,ui,{state=BreakoutEngine.start()},
+        left={
+            GameControl("←","Breakout: mover pala izquierda",ui.active,repeatMillis=40L){state=BreakoutEngine.paddle(state,state.paddle-14f)}
+            GameControl("→","Breakout: mover pala derecha",ui.active,repeatMillis=40L){state=BreakoutEngine.paddle(state,state.paddle+14f)}
+        }, right={
+            GameControl(if(state.launched) "En juego" else "Lanzar","Breakout: lanzar bola",ui.active && !state.launched){state=BreakoutEngine.launch(state)}
+            Text("Vidas ${state.lives}",style=MaterialTheme.typography.bodySmall)
+            Credits("breakout","Breakout · Jake Gordon y colaboradores · MIT")
+        }) { boardModifier ->
+        Box(boardModifier.background(Color(0xFF0C1729),RoundedCornerShape(18.dp))
             .border(1.dp,Color(0xFF294360),RoundedCornerShape(18.dp)),contentAlignment=Alignment.Center) {
             Canvas(Modifier.fillMaxSize().pointerInput(ui.active) {
                 if(ui.active)detectDragGestures(onDragStart={ point ->
@@ -185,13 +183,5 @@ internal fun BreakoutGameScreen() {
             }
             GameOverlay(ui,state.won){state=BreakoutEngine.start()}
         }
-        Row(Modifier.fillMaxWidth(),horizontalArrangement=Arrangement.spacedBy(8.dp)) {
-            GameControl("←","Breakout: mover pala izquierda",ui.active,Modifier.weight(1f),40L){state=BreakoutEngine.paddle(state,state.paddle-14f)}
-            GameControl(if(state.launched)"En juego" else "Lanzar","Breakout: lanzar bola",ui.active && !state.launched,Modifier.weight(1.6f)){
-                state=BreakoutEngine.launch(state)
-            }
-            GameControl("→","Breakout: mover pala derecha",ui.active,Modifier.weight(1f),40L){state=BreakoutEngine.paddle(state,state.paddle+14f)}
-        }
-        Credits("breakout","Breakout · Jake Gordon y colaboradores · MIT")
     }
 }
