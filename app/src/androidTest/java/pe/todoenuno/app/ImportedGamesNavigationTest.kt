@@ -34,7 +34,7 @@ class ImportedGamesNavigationTest {
         compose.mainClock.autoAdvance = false
         compose.onNodeWithContentDescription("Breakout: lanzar bola").performClick()
         compose.mainClock.advanceTimeByFrame()
-        compose.onNodeWithText("En juego").assertExists()
+        compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsNotEnabled()
         compose.mainClock.autoAdvance = true
         compose.onNodeWithText("Pausa").performClick()
         compose.onNodeWithContentDescription("Breakout: mover pala izquierda").assertIsNotEnabled()
