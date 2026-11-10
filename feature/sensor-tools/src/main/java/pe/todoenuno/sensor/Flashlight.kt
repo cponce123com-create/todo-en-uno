@@ -8,6 +8,7 @@ import android.os.Handler
 import android.os.Looper
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +35,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
@@ -67,6 +71,8 @@ fun FlashlightScreen() {
     var mode by remember { mutableStateOf(TorchMode.NORMAL) }
     var owned by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var autoOffMinutes by remember { mutableStateOf(0) }
+    val lifecycleOwner = LocalLifecycleOwner.current
     val latestOwned by rememberUpdatedState(owned)
     val latestMode by rememberUpdatedState(mode)
 
@@ -81,6 +87,27 @@ fun FlashlightScreen() {
         }.onFailure {
             error="El flash no está disponible o está ocupado por otra app."
             enabled=false
+        }
+    }
+
+    DisposableEffect(lifecycleOwner, manager, flashId) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_STOP) {
+                mode = TorchMode.NORMAL
+                if (latestOwned && flashId != null) {
+                    runCatching { manager.setTorchMode(flashId, false) }
+                    owned = false
+                    enabled = false
+                }
+            }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    LaunchedEffect(enabled, mode, autoOffMinutes) {
+        if (enabled && mode == TorchMode.NORMAL && autoOffMinutes > 0) {
+            delay(autoOffMinutes * 60_000L)
+            switch(false)
         }
     }
 
@@ -140,7 +167,7 @@ fun FlashlightScreen() {
         }
     }
 
-    Column(Modifier.fillMaxSize().padding(20.dp),
+    Column(Modifier.fillMaxSize().verticalScroll(rememberScrollState()).padding(20.dp),
         verticalArrangement=Arrangement.Center,
         horizontalAlignment=Alignment.CenterHorizontally) {
         Text("🔦",fontSize=90.sp)
@@ -184,6 +211,17 @@ fun FlashlightScreen() {
                 steps=(maxStrength-2).coerceAtLeast(0),
                 onValueChangeFinished={if(enabled)switch(true)}
             )
+        }
+        if (mode == TorchMode.NORMAL) {
+            Text("Apagado automático", style=MaterialTheme.typography.labelLarge)
+            Row(Modifier.fillMaxWidth().horizontalScroll(rememberScrollState()),
+                horizontalArrangement=Arrangement.spacedBy(8.dp)) {
+                listOf(0, 1, 5, 10).forEach { minutes ->
+                    FilterChip(selected=autoOffMinutes==minutes,
+                        onClick={autoOffMinutes=minutes},
+                        label={Text(if(minutes==0) "Sin temporizador" else "$minutes min")})
+                }
+            }
         }
         error?.let {Text(it,color=MaterialTheme.colorScheme.error)}
         Text(
