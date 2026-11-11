@@ -41,6 +41,7 @@ fun GameControl(label:String,description:String,enabled:Boolean,modifier:Modifie
                 repeatMillis:Long?=null,onAction:()->Unit) {
     var pressed by remember{mutableStateOf(false)}
     val action by rememberUpdatedState(onAction)
+    val currentEnabled by rememberUpdatedState(enabled)
     val scale by animateFloatAsState(if(pressed && enabled).94f else 1f,label="control-press")
     Surface(color=if(enabled)MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceVariant,
         contentColor=if(enabled)MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurfaceVariant,
@@ -50,7 +51,7 @@ fun GameControl(label:String,description:String,enabled:Boolean,modifier:Modifie
                 role=Role.Button
                 contentDescription=description
                 if(!enabled)disabled()
-                onClick { if(enabled){action();true}else false }
+                onClick { if(currentEnabled){action();true}else false }
             }
             .onKeyEvent { event ->
                 if(enabled && event.type==KeyEventType.KeyDown &&
