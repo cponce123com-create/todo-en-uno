@@ -33,7 +33,7 @@ class ImportedGamesNavigationTest {
         compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsNotEnabled()
         compose.onNodeWithText("Empezar").performClick()
         compose.mainClock.autoAdvance = false
-        compose.onNodeWithContentDescription("Breakout: lanzar bola").performSemanticsAction(SemanticsActions.OnClick)
+        compose.onNodeWithContentDescription("Breakout: lanzar bola").performSemanticsAction(SemanticsActions.OnClick) { it() }
         compose.mainClock.advanceTimeBy(100)
         compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsNotEnabled()
         compose.mainClock.autoAdvance = true
