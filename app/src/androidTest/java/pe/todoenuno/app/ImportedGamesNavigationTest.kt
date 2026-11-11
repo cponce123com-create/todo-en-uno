@@ -32,9 +32,13 @@ class ImportedGamesNavigationTest {
         compose.setContent{MaterialTheme{GamesScreen("breakout")}}
         compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsNotEnabled()
         compose.onNodeWithText("Empezar").performClick()
+        compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsEnabled()
         compose.mainClock.autoAdvance = false
-        compose.onNodeWithContentDescription("Breakout: lanzar bola").performSemanticsAction(SemanticsActions.OnClick) { it() }
+        compose.onNodeWithContentDescription("Breakout: lanzar bola").performSemanticsAction(SemanticsActions.OnClick) {
+            check(it()) { "La acción de lanzamiento rechazó el clic" }
+        }
         compose.mainClock.advanceTimeBy(100)
+        compose.onNodeWithText("En juego").assertExists()
         compose.onNodeWithContentDescription("Breakout: lanzar bola").assertIsNotEnabled()
         compose.mainClock.autoAdvance = true
         compose.onNodeWithText("Pausa").performClick()
